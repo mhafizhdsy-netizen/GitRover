@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
 import { UserProfile, Repo, Gist, GistFile } from '../types';
-import { Users, MapPin, Link as LinkIcon, Building, ChevronLeft, ChevronRight, Book, FileCode, LayoutGrid } from 'lucide-react';
+import { Users, MapPin, Link as LinkIcon, Building, ChevronLeft, ChevronRight, Book, FileCode, LayoutGrid, X, Maximize2 } from 'lucide-react';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import RepoCard from '../components/RepoCard';
@@ -79,6 +79,9 @@ const ProfilePage: React.FC = () => {
     const [contentLoading, setContentLoading] = useState(false);
     const [error, setError] = useState<any>(null);
     const [selectedGistId, setSelectedGistId] = useState<string | null>(null);
+    
+    // Avatar Modal State
+    const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
 
     // Get params from URL
     const page = parseInt(searchParams.get('page') || '1', 10);
@@ -205,7 +208,23 @@ const ProfilePage: React.FC = () => {
             <main className="container mx-auto px-4 py-8 flex-grow">
                 {/* Profile Header */}
                 <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left space-y-6 md:space-y-0 md:space-x-8 mb-12 animate-fade-in">
-                    <img src={user.avatar_url} alt={user.login} className="w-40 h-40 rounded-full border-4 border-white dark:border-base-900 shadow-xl" />
+                    
+                    {/* Clickable Avatar */}
+                    <button 
+                        onClick={() => setIsAvatarModalOpen(true)}
+                        className="group relative w-40 h-40 rounded-full border-4 border-white dark:border-base-900 shadow-xl overflow-hidden flex-shrink-0 focus:outline-none focus:ring-4 focus:ring-primary/50"
+                        aria-label="View profile photo"
+                    >
+                        <img 
+                            src={user.avatar_url} 
+                            alt={user.login} 
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                        />
+                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                            <Maximize2 className="text-white drop-shadow-md" size={24} />
+                        </div>
+                    </button>
+
                     <div className="flex-1">
                         <h1 className="text-4xl font-bold text-gray-900 dark:text-white">{user.name || user.login}</h1>
                         <p className="text-xl text-gray-500 dark:text-base-400 mt-1">@{user.login}</p>
@@ -293,11 +312,39 @@ const ProfilePage: React.FC = () => {
             </main>
             <Footer />
 
+            {/* Gist Viewer Modal */}
             {selectedGistId && (
                 <GistViewerModal 
                     gistId={selectedGistId} 
                     onClose={() => setSelectedGistId(null)} 
                 />
+            )}
+
+            {/* Avatar Preview Modal */}
+            {isAvatarModalOpen && (
+                <div 
+                    className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+                    onClick={() => setIsAvatarModalOpen(false)}
+                >
+                    <button 
+                        onClick={() => setIsAvatarModalOpen(false)}
+                        className="absolute top-6 right-6 p-3 rounded-full bg-black/50 hover:bg-black/80 text-white transition-colors border border-white/10"
+                        aria-label="Close preview"
+                    >
+                        <X size={24} />
+                    </button>
+                    
+                    <div 
+                        className="relative max-w-4xl w-full h-full flex items-center justify-center p-4"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <img 
+                            src={user.avatar_url} 
+                            alt={user.login} 
+                            className="max-w-full max-h-[90vh] w-auto h-auto rounded-xl shadow-2xl object-contain" 
+                        />
+                    </div>
+                </div>
             )}
         </div>
     );
