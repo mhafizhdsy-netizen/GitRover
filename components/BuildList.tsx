@@ -25,8 +25,8 @@ const BuildItem: React.FC<{ run: WorkflowRun; isLast: boolean }> = ({ run, isLas
     };
 
     return (
-        <div className="flex gap-4 group">
-            <div className="flex flex-col items-center flex-shrink-0 w-8">
+        <div className="flex gap-4 group hover:bg-base-50 dark:hover:bg-base-800/50 p-3 rounded-lg transition-colors -mx-2">
+            <div className="flex flex-col items-center flex-shrink-0 w-8 pt-1">
                 <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-base-100 dark:bg-base-800 border border-base-200 dark:border-base-700 text-gray-500">
                     <PlayCircle size={16} />
                     <div className="absolute -bottom-1 -right-1">
@@ -36,19 +36,21 @@ const BuildItem: React.FC<{ run: WorkflowRun; isLast: boolean }> = ({ run, isLas
                 {!isLast && <div className="w-0.5 bg-base-200 dark:bg-base-800 flex-grow my-2 group-hover:bg-primary/20 transition-colors"></div>}
             </div>
 
-            <div className="flex-1 pb-8">
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
                     <div className="flex-1 min-w-0">
-                         <div className="flex items-center gap-2 mb-1">
+                         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                             {/* Title Container - allows marquee on hover */}
                              <a 
                                 href={run.html_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="font-semibold text-gray-900 dark:text-white hover:text-primary transition-colors truncate"
+                                className="font-semibold text-gray-900 dark:text-white hover:text-primary transition-colors block overflow-hidden whitespace-nowrap max-w-full"
                              >
-                                 {run.display_title || run.name}
+                                <span className="block truncate group-hover:animate-marquee">{run.display_title || run.name}</span>
                              </a>
-                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium border flex-shrink-0
+
+                             <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide border flex-shrink-0
                                 ${run.conclusion === 'success' ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900' :
                                   run.conclusion === 'failure' ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900' :
                                   run.status === 'in_progress' ? 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-900' :
@@ -59,22 +61,23 @@ const BuildItem: React.FC<{ run: WorkflowRun; isLast: boolean }> = ({ run, isLas
                          </div>
                          
                          <div className="text-sm text-gray-600 dark:text-base-400 space-y-1">
-                             <div className="flex items-center gap-2">
-                                <span className="font-medium text-xs text-gray-500">#{run.run_number}</span>
-                                <span className="text-gray-400">•</span>
-                                <span className="font-medium text-xs">{run.name}</span>
-                                <span className="text-gray-400">•</span>
-                                <span className="flex items-center gap-1 font-mono text-xs bg-base-100 dark:bg-base-800 px-1.5 py-0.5 rounded">
+                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                                <span className="font-medium text-gray-500">#{run.run_number}</span>
+                                <span className="text-gray-300 dark:text-gray-600">•</span>
+                                <span className="font-medium truncate max-w-[150px]">{run.name}</span>
+                                <span className="text-gray-300 dark:text-gray-600">•</span>
+                                <span className="flex items-center gap-1 font-mono text-xs bg-base-100 dark:bg-base-800 px-1.5 py-0.5 rounded border border-base-200 dark:border-base-700">
                                     <GitBranch size={10} /> {run.head_branch}
                                 </span>
                              </div>
                          </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-1.5 text-xs text-gray-500">
+                    <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-1 text-xs text-gray-500 flex-shrink-0 mt-1 sm:mt-0">
                         <div className="flex items-center gap-1.5" title={`Triggered by ${run.actor.login}`}>
-                            <span className="font-medium">{run.actor.login}</span>
+                            <span className="font-medium hidden sm:inline">{run.actor.login}</span>
                             <img src={run.actor.avatar_url} alt={run.actor.login} className="w-5 h-5 rounded-full border border-base-200 dark:border-base-700" />
+                            <span className="font-medium sm:hidden">{run.actor.login}</span>
                         </div>
                         <div className="flex items-center gap-1">
                              <Clock size={12} />
@@ -123,12 +126,12 @@ const BuildList: React.FC<BuildListProps> = ({ owner, repo }) => {
   }
 
   return (
-    <div className="animate-fade-in pl-2">
+    <div className="animate-fade-in pl-2 pr-2">
       <div className="mb-6 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Build History</h3>
       </div>
 
-       <div className="">
+       <div className="space-y-1">
         {runs.map((run, index) => (
             <BuildItem 
                 key={run.id} 
@@ -141,7 +144,7 @@ const BuildList: React.FC<BuildListProps> = ({ owner, repo }) => {
       {loading && <div className="flex justify-center py-8"><Loader2 className="animate-spin text-primary" size={32} /></div>}
 
       {hasMore && !loading && runs.length > 0 && (
-        <div className="text-center pt-4">
+        <div className="text-center pt-6 pb-2">
           <button onClick={() => setPage(p => p + 1)} className="px-5 py-2 text-sm border border-base-300 dark:border-base-700 rounded-lg hover:bg-base-100 dark:hover:bg-base-800 transition font-semibold">
             Load more builds
           </button>

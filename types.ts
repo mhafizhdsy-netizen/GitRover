@@ -1,5 +1,6 @@
 
 
+
 export interface Repo {
   id: number;
   name: string;
@@ -46,6 +47,7 @@ export interface Content {
 
 export interface Commit {
   sha: string;
+  html_url: string;
   commit: {
     author: {
       name: string;

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { githubApi } from '../services/githubApi';
 import { CompareResult, Release } from '../types';
-import { Loader2, X, GitCommit, ArrowRight, FilePlus, FileMinus, FileEdit, AlertTriangle, FileDiff, ChevronDown } from 'lucide-react';
+import { Loader2, X, GitCommit, ArrowRight, FilePlus, FileMinus, FileEdit, AlertTriangle, FileDiff, ChevronDown, Check } from 'lucide-react';
 import { formatRelativeTime } from '../utils/formatters';
 
 interface CompareModalProps {
@@ -12,6 +13,78 @@ interface CompareModalProps {
   releases: Release[];
   onClose: () => void;
 }
+
+// Custom Radio-style Dropdown Selector
+const ReleaseSelector: React.FC<{
+    label: string;
+    value: string;
+    options: Release[];
+    onChange: (val: string) => void;
+}> = ({ label, value, options, onChange }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    return (
+        <div className="relative w-full md:w-auto min-w-[200px]" ref={dropdownRef}>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 ml-1 uppercase tracking-wide">
+                {label}
+            </label>
+            <button 
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full flex items-center justify-between bg-white dark:bg-base-800 border border-base-300 dark:border-base-700 rounded-lg px-4 py-2.5 text-sm font-medium hover:border-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
+            >
+                <span className="truncate">{value}</span>
+                <ChevronDown size={14} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isOpen && (
+                <div className="absolute top-full left-0 mt-1 w-full md:w-64 max-h-64 overflow-y-auto bg-white dark:bg-base-900 border border-base-200 dark:border-base-700 rounded-lg shadow-xl z-30 animate-fade-in custom-scrollbar">
+                    <div className="sticky top-0 bg-base-50 dark:bg-base-950 p-2 border-b border-base-200 dark:border-base-800 text-xs font-semibold text-gray-500">
+                        Select Release
+                    </div>
+                    {options.map((release) => (
+                        <button
+                            key={release.tag_name}
+                            onClick={() => {
+                                onChange(release.tag_name);
+                                setIsOpen(false);
+                            }}
+                            className="w-full flex items-center px-4 py-3 hover:bg-base-50 dark:hover:bg-base-800 transition-colors text-left"
+                        >
+                            <div className={`flex items-center justify-center w-4 h-4 rounded-full border mr-3 flex-shrink-0
+                                ${value === release.tag_name 
+                                    ? 'border-primary bg-primary' 
+                                    : 'border-gray-300 dark:border-gray-600'}`
+                            }>
+                                {value === release.tag_name && (
+                                    <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                                )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className={`text-sm font-medium truncate ${value === release.tag_name ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>
+                                    {release.tag_name}
+                                </div>
+                                <div className="text-xs text-gray-400 truncate">
+                                    {formatRelativeTime(release.published_at)}
+                                </div>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
 
 const CompareModal: React.FC<CompareModalProps> = ({ owner, repo, base: initialBase, head: initialHead, releases, onClose }) => {
   const [data, setData] = useState<CompareResult | null>(null);
@@ -53,44 +126,38 @@ const CompareModal: React.FC<CompareModalProps> = ({ owner, repo, base: initialB
       >
         {/* Header */}
         <header className="flex-shrink-0 border-b border-base-200 dark:border-base-800 p-5 bg-base-50 dark:bg-base-950">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <div className="flex flex-col md:flex-row items-start md:items-start justify-between gap-6">
+                <div className="w-full">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
                         Comparing Changes
                     </h2>
-                    <div className="flex items-center gap-2 mt-2">
+                    
+                    {/* Responsive Selectors */}
+                    <div className="flex flex-col md:flex-row items-center gap-3 w-full">
                         {/* Base Selector */}
-                        <div className="relative">
-                            <select 
-                                value={baseVersion}
-                                onChange={(e) => setBaseVersion(e.target.value)}
-                                className="appearance-none bg-white dark:bg-base-800 border border-base-300 dark:border-base-700 text-gray-700 dark:text-gray-200 text-xs font-mono py-1.5 pl-3 pr-8 rounded-md focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-                            >
-                                {releases.map(r => (
-                                    <option key={r.tag_name} value={r.tag_name}>{r.tag_name}</option>
-                                ))}
-                            </select>
-                            <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
-                        </div>
+                        <ReleaseSelector 
+                            label="Base (Older)" 
+                            value={baseVersion} 
+                            options={releases} 
+                            onChange={setBaseVersion} 
+                        />
 
-                        <span className="text-gray-400"><ArrowRight size={14} /></span>
+                        {/* Direction Arrow */}
+                        <div className="flex items-center justify-center p-2 mt-4 md:mt-5 text-gray-400">
+                             <ArrowRight size={20} className="rotate-90 md:rotate-0" />
+                        </div>
 
                         {/* Head Selector */}
-                        <div className="relative">
-                            <select 
-                                value={headVersion}
-                                onChange={(e) => setHeadVersion(e.target.value)}
-                                className="appearance-none bg-white dark:bg-base-800 border border-base-300 dark:border-base-700 text-gray-700 dark:text-gray-200 text-xs font-mono py-1.5 pl-3 pr-8 rounded-md focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-                            >
-                                {releases.map(r => (
-                                    <option key={r.tag_name} value={r.tag_name}>{r.tag_name}</option>
-                                ))}
-                            </select>
-                            <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
-                        </div>
+                        <ReleaseSelector 
+                            label="Head (Newer)" 
+                            value={headVersion} 
+                            options={releases} 
+                            onChange={setHeadVersion} 
+                        />
                     </div>
                 </div>
-                <button onClick={onClose} className="p-2 rounded-full hover:bg-base-200 dark:hover:bg-base-800 text-gray-500 self-start md:self-center">
+                
+                <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full hover:bg-base-200 dark:hover:bg-base-800 text-gray-500 transition-colors">
                     <X size={20} />
                 </button>
             </div>
