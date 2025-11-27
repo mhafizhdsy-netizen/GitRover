@@ -95,10 +95,9 @@ export default function HomePage() {
 
   const handlePageChange = (newPage: number) => {
       setPage(newPage);
-      // Update URL to reflect new page number and keep sort
+      // Update URL to reflect new page number and keep sort. 
+      // The global ScrollToTop component will handle scrolling since the URL changes.
       setSearchParams({ q: searchTerm, page: newPage.toString(), sort: sort });
-      // Scroll to top smoothly
-      window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSortSelect = (newSort: string) => {

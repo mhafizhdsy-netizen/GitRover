@@ -1,6 +1,7 @@
 
+
 import axios from 'axios';
-import { Repo, Content, Commit, Issue, PullRequest, Contributor, RepoSearchResult, Branch, UserProfile } from '../types';
+import { Repo, Content, Commit, Issue, PullRequest, Contributor, RepoSearchResult, Branch, UserProfile, Release, WorkflowRun, Deployment, DeploymentStatus, CompareResult, Gist } from '../types';
 
 const API = axios.create({
   baseURL: 'https://api.github.com',
@@ -72,4 +73,34 @@ export const githubApi = {
 
   getUserRepos: (username: string, page = 1) =>
     API.get<Repo[]>(`/users/${username}/repos?sort=updated&page=${page}&per_page=12`),
+
+  // --- New Endpoints ---
+
+  getReleases: (owner: string, repo: string, page = 1) =>
+    API.get<Release[]>(`/repos/${owner}/${repo}/releases?page=${page}&per_page=10`),
+
+  getWorkflowRuns: (owner: string, repo: string, page = 1) =>
+    API.get<{ total_count: number; workflow_runs: WorkflowRun[] }>(`/repos/${owner}/${repo}/actions/runs?page=${page}&per_page=15`),
+
+  getDeployments: (owner: string, repo: string, page = 1) =>
+    API.get<Deployment[]>(`/repos/${owner}/${repo}/deployments?page=${page}&per_page=10`),
+
+  getDeploymentStatuses: (owner: string, repo: string, deploymentId: number) =>
+    API.get<DeploymentStatus[]>(`/repos/${owner}/${repo}/deployments/${deploymentId}/statuses`),
+    
+  compareCommits: (owner: string, repo: string, base: string, head: string) =>
+    API.get<CompareResult>(`/repos/${owner}/${repo}/compare/${base}...${head}`),
+
+  // Fetch the last commit for a specific path to determine modification time
+  getLastCommitForPath: (owner: string, repo: string, path: string, sha?: string) =>
+    API.get<Commit[]>(`/repos/${owner}/${repo}/commits`, {
+        params: { path, sha, per_page: 1 }
+    }),
+
+  // --- Gists ---
+  getUserGists: (username: string, page = 1) =>
+    API.get<Gist[]>(`/users/${username}/gists?page=${page}&per_page=12`),
+
+  getGist: (id: string) =>
+    API.get<Gist>(`/gists/${id}`),
 };

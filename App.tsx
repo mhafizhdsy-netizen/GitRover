@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
@@ -10,7 +9,7 @@ import TermsPage from './pages/TermsPage';
 import AboutPage from './pages/AboutPage';
 import DocsPage from './pages/DocsPage';
 import RoadmapPage from './pages/RoadmapPage';
-import LicensePage from './pages/LicensePage'; // Import halaman lisensi baru
+import LicensePage from './pages/LicensePage'; 
 import { ThemeContext, ThemeMode, ThemeName } from './contexts/ThemeContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -18,6 +17,7 @@ import SettingsModal from './components/SettingsModal';
 import { ToastContainer } from './components/common/Toast';
 import BackToTop from './components/common/BackToTop';
 import CookieConsent from './components/common/CookieConsent';
+import ScrollToTop from './components/common/ScrollToTop'; // Import ScrollToTop
 import { themes } from './themes';
 
 export default function App() {
@@ -62,7 +62,7 @@ export default function App() {
     root.style.setProperty('--color-secondary', palette.secondary);
     
     Object.entries(palette.base).forEach(([shade, value]) => {
-      root.style.setProperty(`--color-base-${shade}`, value);
+      root.style.setProperty(`--color-base-${shade}`, value as string);
     });
 
     // 3. Persist choices to local storage
@@ -70,9 +70,7 @@ export default function App() {
       localStorage.setItem('color_theme', themeName);
       localStorage.setItem('theme_mode', mode);
     } catch (e) {
-      // FIX: The error object `e` is of type 'unknown' and must be cast to a string to be logged.
-      // FIX: Argument of type 'unknown' is not assignable to parameter of type 'string'. Cast 'e' to string.
-      console.error('Could not access local storage', String(e));
+      console.error('Could not access local storage', e instanceof Error ? e.message : String(e));
     }
   }, [themeName, mode]);
 
@@ -89,6 +87,7 @@ export default function App() {
         <SettingsProvider>
           <div className="min-h-screen text-gray-800 dark:text-base-200 bg-base-50 dark:bg-base-950 font-sans flex flex-col">
             <HashRouter>
+              <ScrollToTop /> {/* Handle Global Scroll Restoration */}
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/search" element={<HomePage />} />

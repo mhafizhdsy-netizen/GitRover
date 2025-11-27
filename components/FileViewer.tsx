@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { githubApi } from '../services/githubApi';
 import { Content } from '../types';
@@ -230,6 +231,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
              return;
         }
         
+        // 3. Get text, but verify it's not just whitespace
         const text = selection.toString().trim();
         
         if (text) {
@@ -331,6 +333,14 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
           showLineNumbers
           wrapLines
           lineProps={getLineProps}
+          // IMPORTANT: Prevent line number selection to fix AI explain issues
+          lineNumberStyle={{ 
+            minWidth: '2.5em', 
+            paddingRight: '1em', 
+            textAlign: 'right', 
+            userSelect: 'none', 
+            opacity: 0.5 
+          }}
           customStyle={{ margin: 0, paddingTop: '2.5rem', userSelect: 'text', cursor: 'text' }}
           codeTagProps={{ 
             style: { 

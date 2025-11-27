@@ -11,61 +11,86 @@ interface RepoCardProps {
 
 const RepoCard: React.FC<RepoCardProps> = ({ repo }) => {
   return (
-    <Link to={`/repo/${repo.full_name}`} className="block group h-full">
-      <div className="bg-white dark:bg-base-900 rounded-2xl p-5 shadow-sm border border-base-200 dark:border-base-800 h-full flex flex-col transition-all duration-300 ease-out group-hover:scale-[1.02] group-hover:shadow-xl group-hover:border-primary/30 dark:group-hover:border-primary/30 group-hover:shadow-primary/5">
-        <div>
-          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 truncate group-hover:text-primary transition-colors">
-            {repo.full_name}
-          </h3>
-          <p className="text-gray-600 dark:text-base-300 text-sm mt-2 h-10 overflow-hidden line-clamp-2">
-            {repo.description}
-          </p>
+    <div className="group relative h-full flex flex-col bg-white dark:bg-base-900 rounded-2xl p-5 shadow-sm border border-base-200 dark:border-base-800 transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-xl hover:border-primary/30 dark:hover:border-primary/30 hover:shadow-primary/5">
+        
+        {/* Main Click Area (Absolute Link for the Card) */}
+        <Link 
+            to={`/repo/${repo.full_name}`} 
+            className="absolute inset-0 z-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-base-900"
+            aria-label={`View repository ${repo.full_name}`}
+        />
+
+        {/* Top Section: Title & Language */}
+        <div className="flex justify-between items-start mb-2 relative z-0 pointer-events-none">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 truncate pr-2 group-hover:text-primary transition-colors">
+                {repo.name}
+            </h3>
+            {repo.language && (
+                <span className="flex-shrink-0 flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-base-100 dark:bg-base-800 text-gray-600 dark:text-gray-300 border border-base-200 dark:border-base-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary mr-1.5"></span>
+                    {repo.language}
+                </span>
+            )}
         </div>
 
-        {repo.topics && repo.topics.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-1.5">
-            {repo.topics.slice(0, 4).map((topic) => (
-              <span 
-                key={topic} 
-                className="px-2 py-0.5 text-[10px] font-medium bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-300 rounded-full border border-blue-100 dark:border-blue-900/30"
-              >
-                {topic}
-              </span>
-            ))}
-            {repo.topics.length > 4 && (
-              <span className="px-1.5 py-0.5 text-[10px] text-gray-400">
-                +{repo.topics.length - 4}
-              </span>
-            )}
-          </div>
-        )}
-        
-        <div className="mt-auto pt-4 flex flex-col gap-3">
-            <div className="flex items-center justify-between text-sm text-gray-700 dark:text-base-300">
-                <div className="flex items-center space-x-4">
-                    <span className="flex items-center" title="Stars">
-                      <Star size={16} className="mr-1.5 text-yellow-500 group-hover:fill-yellow-500 transition-colors" />
-                      {formatNumber(repo.stargazers_count)}
+        {/* Middle Section: Description & Topics */}
+        <div className="relative z-0 pointer-events-none flex-grow flex flex-col">
+            <p className="text-gray-600 dark:text-base-300 text-sm h-10 overflow-hidden line-clamp-2 leading-relaxed mb-3">
+                {repo.description || "No description provided."}
+            </p>
+
+            {repo.topics && repo.topics.length > 0 && (
+                <div className="mt-auto flex flex-wrap gap-1.5 opacity-80">
+                    {repo.topics.slice(0, 3).map((topic) => (
+                    <span 
+                        key={topic} 
+                        className="px-2 py-0.5 text-[10px] font-medium bg-base-50 text-gray-600 dark:bg-base-800 dark:text-gray-400 rounded-md border border-base-200 dark:border-base-700"
+                    >
+                        {topic}
                     </span>
-                    <span className="flex items-center" title="Forks">
-                      <GitFork size={16} className="mr-1.5 text-gray-500 dark:text-base-400" />
-                      {formatNumber(repo.forks_count)}
-                    </span>
+                    ))}
+                    {repo.topics.length > 3 && (
+                        <span className="text-[10px] text-gray-400 flex items-center">+{repo.topics.length - 3}</span>
+                    )}
                 </div>
-                 {repo.language && (
-                    <span className="flex items-center text-xs font-medium px-2 py-1 rounded-full bg-base-100 dark:bg-base-800 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                      <span className="h-2 w-2 rounded-full bg-primary mr-1.5"></span>
-                      {repo.language}
+            )}
+        </div>
+        
+        {/* Divider */}
+        <div className="my-4 border-t border-base-100 dark:border-base-800/50 relative z-0"></div>
+
+        {/* Footer: Owner & Stats */}
+        <div className="mt-auto flex items-center justify-between">
+             {/* Owner Info - Interactive Z-10 to allow clicking the user profile specifically */}
+            <div className="relative z-10 flex items-center min-w-0 mr-4">
+                <Link 
+                    to={`/profile/${repo.owner.login}`} 
+                    className="flex items-center gap-2 hover:bg-base-100 dark:hover:bg-base-800 rounded-full pr-3 pl-1 py-1 -ml-1 transition-colors group/user max-w-full"
+                >
+                    <img 
+                        src={repo.owner.avatar_url} 
+                        alt={repo.owner.login} 
+                        className="w-5 h-5 rounded-full border border-base-200 dark:border-base-700 flex-shrink-0" 
+                    />
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 group-hover/user:text-primary transition-colors truncate">
+                        {repo.owner.login}
                     </span>
-                 )}
+                </Link>
             </div>
-            <div className="flex items-center text-xs text-gray-400 dark:text-gray-500 pt-2 border-t border-base-100 dark:border-base-800/50">
-                <Clock size={12} className="mr-1.5" />
-                <span>Updated {formatRelativeTime(repo.updated_at)}</span>
+
+            {/* Metrics */}
+            <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 relative z-0 pointer-events-none flex-shrink-0">
+                <div className="flex items-center" title="Stars">
+                    <Star size={14} className="mr-1 text-yellow-500 fill-yellow-500" />
+                    {formatNumber(repo.stargazers_count)}
+                </div>
+                <div className="flex items-center" title="Forks">
+                    <GitFork size={14} className="mr-1" />
+                    {formatNumber(repo.forks_count)}
+                </div>
             </div>
         </div>
-      </div>
-    </Link>
+    </div>
   );
 };
 

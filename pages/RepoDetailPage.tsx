@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
 import { Repo, Contributor, Branch } from '../types';
-import { Code, GitCommit, AlertCircle, GitPullRequest, Scale, FileText, PanelRightOpen, X } from 'lucide-react';
+import { Code, GitCommit, AlertCircle, GitPullRequest, Scale, FileText, PanelRightOpen, X, Tag, PlayCircle, Rocket } from 'lucide-react';
 import RepoHeader from '../components/RepoHeader';
 import { RepoSidebar } from '../components/RepoSidebar';
 import FileExplorer from '../components/FileExplorer';
@@ -11,6 +12,9 @@ import IssueList from '../components/IssueList';
 import PullRequestList from '../components/PullRequestList';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import LicenseViewer from '../components/LicenseViewer';
+import ReleaseList from '../components/ReleaseList';
+import BuildList from '../components/BuildList';
+import DeploymentList from '../components/DeploymentList';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import ErrorDisplay from '../components/common/ErrorDisplay';
@@ -18,6 +22,9 @@ import ErrorDisplay from '../components/common/ErrorDisplay';
 const TABS = [
   { name: 'Code', icon: Code },
   { name: 'Commits', icon: GitCommit },
+  { name: 'Releases', icon: Tag },
+  { name: 'Builds', icon: PlayCircle },
+  { name: 'Deployments', icon: Rocket },
   { name: 'Issues', icon: AlertCircle },
   { name: 'Pull Requests', icon: GitPullRequest },
   { name: 'License', icon: Scale },
@@ -45,8 +52,8 @@ const SkeletonLoader: React.FC = () => (
         <div className="lg:flex lg:space-x-8 mt-10">
             <main className="lg:w-[calc(100%-22rem)] flex-1">
                 {/* Tabs Skeleton */}
-                <div className="flex border-b border-base-200 dark:border-base-800 mb-6 gap-1">
-                    {[1, 2, 3, 4, 5].map(i => (
+                <div className="flex border-b border-base-200 dark:border-base-800 mb-6 gap-1 overflow-x-hidden">
+                    {[1, 2, 3, 4, 5, 6].map(i => (
                         <div key={i} className="h-10 w-24 bg-base-200 dark:bg-base-800 rounded-t-lg mx-1 mb-[-1px]"></div>
                     ))}
                 </div>
@@ -236,6 +243,12 @@ export default function RepoDetailPage() {
         );
       case 'Commits':
         return <CommitList owner={owner!} repo={name!} />;
+      case 'Releases':
+        return <ReleaseList owner={owner!} repo={name!} />;
+      case 'Builds':
+        return <BuildList owner={owner!} repo={name!} />;
+      case 'Deployments':
+        return <DeploymentList owner={owner!} repo={name!} />;
       case 'Issues':
         return <IssueList owner={owner!} repo={name!} />;
       case 'Pull Requests':
@@ -254,17 +267,17 @@ export default function RepoDetailPage() {
         <RepoHeader repo={repo} />
         
         <div className="lg:flex lg:space-x-8 mt-6 lg:mt-10">
-          <main className="lg:w-[calc(100%-22rem)] flex-1">
+          <main className="lg:w-[calc(100%-22rem)] flex-1 min-w-0">
             <div className="flex justify-between items-center border-b border-base-200 dark:border-base-800 mb-6">
-              <nav className="flex space-x-2 overflow-x-auto" aria-label="Tabs">
+              <nav className="flex space-x-2 overflow-x-auto pb-0.5 scrollbar-hide" aria-label="Tabs">
                 {TABS.map((tab) => (
                   <button
                     key={tab.name}
                     onClick={() => setActiveTab(tab.name)}
                     className={`flex items-center whitespace-nowrap py-2.5 px-4 font-medium text-sm transition-colors rounded-t-lg
                       ${activeTab === tab.name
-                        ? 'bg-base-100 dark:bg-base-900 text-primary'
-                        : 'text-gray-500 hover:text-gray-800 dark:text-base-400 dark:hover:text-white'
+                        ? 'bg-base-100 dark:bg-base-900 text-primary border-b-2 border-primary'
+                        : 'text-gray-500 hover:text-gray-800 dark:text-base-400 dark:hover:text-white hover:bg-base-50 dark:hover:bg-base-800'
                       }`}
                   >
                     <tab.icon size={16} className="mr-2" />

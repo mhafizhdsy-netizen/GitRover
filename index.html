@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -244,6 +245,7 @@
         line-height: 1;
         transition: color 0.2s ease;
         z-index: 10;
+        user-select: none; /* Crucial: Prevent selecting the folding arrow */
       }
       .dark .foldable-line::before {
         color: #6b7280; /* gray-500 */

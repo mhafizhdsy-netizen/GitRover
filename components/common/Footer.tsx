@@ -12,22 +12,23 @@ const Footer: React.FC = () => {
 
   if (!isFullFooter) {
     return (
-      <footer className="bg-base-50 dark:bg-base-950 border-t border-base-200 dark:border-base-800 py-6 mt-auto">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 dark:text-base-400">
-          <div className="flex items-center mb-3 md:mb-0">
-             <GitRoverIcon className="w-4 h-4 mr-2 opacity-50" />
-             <span className="font-medium">&copy; {new Date().getFullYear()} GitRover</span>
-          </div>
-          
-          <div className="flex items-center space-x-6">
-            <Link to="/" className="hover:text-primary transition-colors">Home</Link>
-            <Link to="/about" className="hover:text-primary transition-colors">About</Link>
-            <Link to="/terms" className="hover:text-primary transition-colors">Terms & Policy</Link>
-            <Link to="/license" className="hover:text-primary transition-colors">License</Link>
-            <div className="flex items-center pl-2 border-l border-base-300 dark:border-base-700">
-                <span>Made with</span>
-                <Heart size={12} className="mx-1 text-red-500 fill-red-500" />
-                <span>by <strong className="text-primary">RioDev</strong></span>
+      <footer className="py-8 mt-auto border-t border-base-200 dark:border-base-800 bg-white/50 dark:bg-base-950/50 backdrop-blur-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <nav className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+                <Link to="/" className="hover:text-primary transition-colors">Home</Link>
+                <Link to="/about" className="hover:text-primary transition-colors">About</Link>
+                <Link to="/docs" className="hover:text-primary transition-colors">Docs</Link>
+                <Link to="/terms" className="hover:text-primary transition-colors">Terms</Link>
+                <Link to="/license" className="hover:text-primary transition-colors">License</Link>
+            </nav>
+            
+            <div className="flex items-center space-x-3 text-xs text-gray-400 dark:text-gray-500">
+                <span>&copy; {new Date().getFullYear()} GitRover</span>
+                <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
+                <span className="flex items-center">
+                    Made with <Heart size={10} className="mx-1 text-red-500 fill-red-500" /> by <strong className="ml-1 text-gray-500 dark:text-gray-400">RioDev</strong>
+                </span>
             </div>
           </div>
         </div>

@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useCallback, useContext, ReactNode, useMemo } from 'react';
 import { ThemeContext } from './ThemeContext';
 
@@ -65,7 +64,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         localStorage.removeItem('github_pat');
       }
     } catch (e) {
-      console.error('Could not access local storage', e);
+      console.error('Could not access local storage', String(e));
     }
   }, []);
 
@@ -83,7 +82,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     try {
       localStorage.setItem('syntax_theme', key);
     } catch (e) {
-      console.error('Could not access local storage', e);
+      console.error('Could not access local storage', String(e));
     }
   }, []);
 
