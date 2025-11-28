@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
@@ -89,24 +90,35 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ owner, name, path, branch, 
       })
       .finally(() => setLoading(false));
   }, [owner, name, path, branch, navigate]);
-
+  
   useEffect(() => {
-    if (contents.length === 0) return;
     let isMounted = true;
-    const fetchDates = async () => {
-      const itemsToFetch = contents.slice(0, 50); 
-      const promises = itemsToFetch.map(async (item) => {
-        try {
-           await new Promise(resolve => setTimeout(resolve, Math.random() * 500));
-           const res = await githubApi.getLastCommitForPath(owner, name, item.path, branch);
-           if (res.data && res.data[0] && isMounted) {
-               setFileDates(prev => ({ ...prev, [item.path]: res.data[0].commit.author.date }));
-           }
-        } catch {}
-      });
-      await Promise.allSettled(promises);
+    const fetchAllDates = async () => {
+        if (!isMounted) return;
+        const promises = contents.map(item =>
+            githubApi.getLastCommitForPath(owner, name, item.path, branch)
+                .then(res => {
+                    if (res.data && res.data.length > 0) {
+                        return { path: item.path, date: res.data[0].commit.author.date };
+                    }
+                    return null;
+                })
+                .catch(() => null) // Ignore errors for single files
+        );
+        const results = await Promise.allSettled(promises);
+        if (isMounted) {
+            const newDates: Record<string, string> = {};
+            results.forEach(result => {
+                if (result.status === 'fulfilled' && result.value) {
+                    newDates[result.value.path] = result.value.date;
+                }
+            });
+            setFileDates(prev => ({ ...prev, ...newDates }));
+        }
     };
-    fetchDates();
+    if (contents.length > 0) {
+        fetchAllDates();
+    }
     return () => { isMounted = false; };
   }, [contents, owner, name, branch]);
 
