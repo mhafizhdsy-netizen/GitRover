@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
-import { Search, Loader2, CornerDownLeft, GripHorizontal } from 'lucide-react';
+import { Search, Loader2, CornerDownLeft } from 'lucide-react';
 import { getFileIcon } from '../utils/fileIcons';
 
 interface GoToFileModalProps {
@@ -20,7 +20,6 @@ interface TreeItem {
 
 const ITEM_HEIGHT = 44; // Corresponds to py-2.5 (10px * 2) + line height, rounded
 const VISIBLE_ITEMS = 12;
-const DISMISS_THRESHOLD = 80;
 
 const GoToFileModal: React.FC<GoToFileModalProps> = ({ owner, name, branch, show, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -29,17 +28,11 @@ const GoToFileModal: React.FC<GoToFileModalProps> = ({ owner, name, branch, show
   const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  // Gesture state
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchDelta, setTouchDelta] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  
   // Virtualization state
   const [scrollTop, setScrollTop] = useState(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,8 +55,6 @@ const GoToFileModal: React.FC<GoToFileModalProps> = ({ owner, name, branch, show
       setSearchTerm('');
       setSelectedIndex(0);
       setScrollTop(0);
-      setTouchDelta(0);
-      setIsDragging(false);
     }
   }, [show, owner, name, branch, fullTree.length]);
 
@@ -89,8 +80,13 @@ const GoToFileModal: React.FC<GoToFileModalProps> = ({ owner, name, branch, show
     setSelectedIndex(0);
     if (listRef.current) listRef.current.scrollTop = 0;
   }, [searchTerm, fullTree]);
+  
+  const handleItemClick = (path: string) => {
+    navigate(`/repo/${owner}/${name}/blob/${branch}/${path}`);
+    onClose();
+  };
 
-  const handleNavigation = (e: KeyboardEvent) => {
+  const handleNavigation = useCallback((e: KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
         e.preventDefault();
         setSelectedIndex(prev => Math.min(prev + 1, results.length - 1));
@@ -100,20 +96,19 @@ const GoToFileModal: React.FC<GoToFileModalProps> = ({ owner, name, branch, show
     } else if (e.key === 'Enter') {
         e.preventDefault();
         if (results[selectedIndex]) {
-            navigate(`/repo/${owner}/${name}/blob/${branch}/${results[selectedIndex].path}`);
-            onClose();
+            handleItemClick(results[selectedIndex].path);
         }
     } else if (e.key === 'Escape') {
         onClose();
     }
-  };
+  }, [results, selectedIndex, owner, name, branch, navigate, onClose]);
 
   useEffect(() => {
     if (show) {
         window.addEventListener('keydown', handleNavigation);
     }
     return () => window.removeEventListener('keydown', handleNavigation);
-  }, [show, results, selectedIndex, owner, name, branch, navigate, onClose]);
+  }, [show, handleNavigation]);
 
   useEffect(() => {
     if (!listRef.current) return;
@@ -129,30 +124,6 @@ const GoToFileModal: React.FC<GoToFileModalProps> = ({ owner, name, branch, show
     }
   }, [selectedIndex]);
 
-  // --- Gesture Handlers ---
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if ((e.target as HTMLElement).closest('ul')) return; // Don't drag if starting on the list
-    setTouchStart(e.touches[0].clientY);
-    setIsDragging(true);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (touchStart === null) return;
-    const delta = e.touches[0].clientY - touchStart;
-    if (delta > 0) { // Only allow dragging down
-      setTouchDelta(delta);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (touchDelta > DISMISS_THRESHOLD) {
-      onClose();
-    } else {
-      setTouchDelta(0);
-    }
-    setTouchStart(null);
-    setIsDragging(false);
-  };
 
   // --- Virtualization Logic ---
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -167,20 +138,12 @@ const GoToFileModal: React.FC<GoToFileModalProps> = ({ owner, name, branch, show
   if (!portalRoot || !show) return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/60 z-[60] flex justify-center items-end sm:items-start sm:pt-[15vh] p-0" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/60 z-[60] flex justify-center items-center p-4" onClick={onClose}>
       <div 
-        ref={modalRef}
-        className={`bg-white dark:bg-base-900 shadow-2xl w-full h-full sm:h-auto sm:max-w-2xl flex flex-col overflow-hidden animate-fade-in rounded-none sm:rounded-xl transition-transform duration-200 ease-out ${isDragging ? '!duration-0' : ''}`} 
-        style={{ transform: `translateY(${touchDelta}px)` }}
+        className="bg-white dark:bg-base-900 shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden animate-fade-in rounded-xl" 
         onClick={(e) => e.stopPropagation()}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
       >
-        <div className="text-center pt-2 pb-1 sm:hidden cursor-grab active:cursor-grabbing">
-            <GripHorizontal className="inline-block text-gray-300 dark:text-gray-700" />
-        </div>
-        <div className="p-3 sm:p-4 border-b border-base-200 dark:border-base-800 flex items-center gap-3 flex-shrink-0">
+        <div className="p-4 border-b border-base-200 dark:border-base-800 flex items-center gap-3 flex-shrink-0">
             <Search size={18} className="text-gray-400" />
             <input 
                 ref={inputRef}
@@ -192,7 +155,7 @@ const GoToFileModal: React.FC<GoToFileModalProps> = ({ owner, name, branch, show
             />
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto sm:max-h-[50vh] relative" onScroll={handleScroll} ref={listRef}>
+        <div className="flex-1 min-h-0 overflow-y-auto max-h-[60vh] relative" onScroll={handleScroll} ref={listRef}>
             {loading ? (
                 <div className="flex items-center justify-center p-16 space-x-3 text-gray-500">
                     <Loader2 size={20} className="animate-spin" />
@@ -205,14 +168,15 @@ const GoToFileModal: React.FC<GoToFileModalProps> = ({ owner, name, branch, show
                         return (
                             <div
                                 key={item.path}
+                                onClick={() => handleItemClick(item.path)}
                                 style={{
                                     transform: `translateY(${index * ITEM_HEIGHT}px)`,
                                     height: `${ITEM_HEIGHT}px`,
                                 }}
-                                className={`absolute top-0 left-0 w-full px-4 flex items-center gap-3 border-l-2 ${
+                                className={`absolute top-0 left-0 w-full px-4 flex items-center gap-3 border-l-2 cursor-pointer ${
                                     selectedIndex === index
                                     ? 'bg-primary/10 border-primary' 
-                                    : 'border-transparent'
+                                    : 'border-transparent hover:bg-primary/5 dark:hover:bg-primary/10'
                                 }`}
                             >
                                 <div className="flex-shrink-0">{getFileIcon(item.path, 'file')}</div>
@@ -226,7 +190,7 @@ const GoToFileModal: React.FC<GoToFileModalProps> = ({ owner, name, branch, show
             )}
         </div>
 
-        <footer className="hidden sm:flex p-2 bg-base-50 dark:bg-base-950/50 border-t border-base-200 dark:border-base-800 text-xs text-gray-500 items-center justify-end gap-4">
+        <footer className="p-2 bg-base-50 dark:bg-base-950/50 border-t border-base-200 dark:border-base-800 text-xs text-gray-500 flex items-center justify-end gap-4">
             <span><strong className="px-1.5 py-0.5 rounded bg-base-200 dark:bg-base-800">↑</strong><strong className="px-1.5 py-0.5 rounded bg-base-200 dark:bg-base-800">↓</strong> to navigate</span>
             <span><strong className="px-1.5 py-0.5 rounded bg-base-200 dark:bg-base-800 flex-shrink-0 inline-flex items-center"><CornerDownLeft size={10} className="mr-0.5" /> Enter</strong> to select</span>
             <span><strong className="px-1.5 py-0.5 rounded bg-base-200 dark:bg-base-800">esc</strong> to close</span>
