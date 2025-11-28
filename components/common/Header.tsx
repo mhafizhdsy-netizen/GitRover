@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation, useMatch } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ThemeContext } from '../../contexts/ThemeContext';
 import { Sun, Moon, Settings, ArrowLeft, Bookmark } from 'lucide-react';
 import { GitRoverIcon } from '../../assets/icon';
@@ -13,9 +13,6 @@ const Header: React.FC = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  const onRepoPage = useMatch('/repo/:owner/:name/*');
-  const onProfilePage = useMatch('/profile/:username');
-  
   const isHeroPage = location.pathname === '/' || location.pathname === '/about';
   const headerPosition = isHeroPage ? 'fixed w-full' : 'sticky';
 
@@ -51,11 +48,13 @@ const Header: React.FC = () => {
   const showAppControls = !staticPages.includes(location.pathname);
 
   const handleBack = () => {
-    if (onRepoPage || onProfilePage) {
-      navigate('/search');
-    } else if (window.history.state && window.history.state.idx > 0) {
+    // If there's a history to go back to, just go back.
+    // This is the most natural behavior and preserves URL state (like search queries).
+    if (window.history.state && window.history.state.idx > 0) {
       navigate(-1);
     } else {
+      // If there is no history (e.g., user landed on this page directly),
+      // provide a sensible fallback to the main search page.
       navigate('/search', { replace: true });
     }
   };
