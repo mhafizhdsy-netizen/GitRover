@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { githubApi } from '../services/githubApi';
 import { CompareResult, Release } from '../types';
 import { Loader2, X, GitCommit, ArrowRight, FilePlus, FileMinus, FileEdit, AlertTriangle, FileDiff, ChevronDown, Check, Calendar, User, ArrowUpRight, Hash } from 'lucide-react';
@@ -147,7 +147,10 @@ const CompareModal: React.FC<CompareModalProps> = ({ owner, repo, base: initialB
       )
   }
 
-  return (
+  const portalRoot = document.getElementById('portal-root');
+  if (!portalRoot) return null;
+
+  return createPortal(
     <div className="fixed inset-0 bg-base-950/60 backdrop-blur-sm z-50 flex justify-center items-center p-4 animate-fade-in" onClick={onClose}>
       <div 
         className="bg-white dark:bg-base-950 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90dvh] flex flex-col overflow-hidden border border-base-200 dark:border-base-800" 
@@ -376,7 +379,8 @@ const CompareModal: React.FC<CompareModalProps> = ({ owner, repo, base: initialB
             ) : null}
         </div>
       </div>
-    </div>
+    </div>,
+    portalRoot
   );
 };
 

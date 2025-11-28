@@ -83,7 +83,7 @@ const Footer: React.FC = () => {
             <h4 className="font-bold text-gray-900 dark:text-white mb-6">Connect</h4>
             <div className="flex gap-4">
               <a 
-                href="https://github.com/mhafizhdsy-netizen" 
+                href="https://github.com" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="p-3 bg-base-100 dark:bg-base-900 rounded-full hover:bg-black hover:text-white transition-all text-gray-600 dark:text-base-400 border border-transparent hover:border-black/20 group shadow-sm" 
@@ -92,7 +92,7 @@ const Footer: React.FC = () => {
                 <Github size={20} className="group-hover:scale-110 transition-transform" />
               </a>
               <a 
-                href="https://www.instagram.com/elchampionee?igsh=MmVpbjNmdmNmaTJt" 
+                href="https://instagram.com" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="p-3 bg-base-100 dark:bg-base-900 rounded-full hover:bg-pink-500 hover:text-white transition-all text-gray-600 dark:text-base-400 border border-transparent hover:border-pink-500/20 group shadow-sm" 
