@@ -1,12 +1,15 @@
+
 import React from 'react';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
-import { Code, Cpu, Shield, Layout, Zap, ArrowRight, GitBranch, Calendar, Rocket, Sparkles } from 'lucide-react';
+import { Code, Cpu, Shield, Layout, Zap, ArrowRight, GitBranch, Calendar, Rocket, Sparkles, Layers, PencilRuler } from 'lucide-react';
 import { GitRoverIcon } from '../assets/icon';
+import SEO from '../components/common/SEO';
 
 const AboutPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-base-50 dark:bg-base-950">
+      <SEO title="About GitRover - Our Mission & Principles" description="Learn about the mission, journey, and core principles behind GitRover." />
       <Header />
       <main className="flex-grow">
         {/* Hero Section */}
@@ -38,13 +41,15 @@ const AboutPage: React.FC = () => {
                 <div className="relative max-w-2xl mx-auto">
                     <div className="absolute left-3.5 sm:left-1/2 top-4 h-[calc(100%-2rem)] w-1 bg-gradient-to-b from-transparent via-primary/20 to-transparent"></div>
                     {[
-                        { icon: GitBranch, date: 'Q4 2023', title: 'Concept & First Commit', text: 'The idea for a minimalist GitHub reader was born. The first lines of code were written, focusing on a clean, fast file explorer.' },
-                        { icon: Sparkles, date: 'Q1 2024', title: 'AI Integration', text: 'We integrated Google Gemini, introducing the "Explain Code" feature and repository summarization to provide deeper insights.' },
-                        { icon: Rocket, date: 'Q2 2024', title: 'Version 2.0 Launch', text: 'Launched with a refined UI, multiple themes, and a robust feature set, establishing GitRover as a powerful developer tool.' },
-                        { icon: Calendar, date: 'Present', title: 'Continuous Improvement', text: 'We are constantly adding new features, themes, and performance enhancements based on community feedback.' },
+                        { icon: GitBranch, date: 'Q1 2025', title: 'Concept & First Commit', text: 'The idea for a minimalist GitHub reader was born. The first lines of code were written, focusing on a clean, fast file explorer.' },
+                        { icon: Sparkles, date: 'Q2 2025', title: 'AI Integration', text: 'We integrated Google Gemini, introducing the "Explain Code" feature and repository summarization to provide deeper insights.' },
+                        { icon: Rocket, date: 'Q3 2025', title: 'Version 2.0 Launch', text: 'Launched with a refined UI, multiple themes, and a robust feature set, establishing GitRover as a powerful developer tool.' },
+                        { icon: Layers, date: 'Q4 2025', title: 'Ecosystem Expansion', text: 'Expanded capabilities with local bookmarks, Gist exploration, release comparison tools, and enhanced sorting options.' },
+                        { icon: PencilRuler, date: 'Late 2025', title: 'UX Refinement', text: 'Implemented advanced file sorting, layout improvements, and comprehensive commit tracking features.' },
+                        { icon: Calendar, date: 'Future 2025+', title: 'Continuous Improvement', text: 'We are constantly adding new features, themes, and performance enhancements based on community feedback.' },
                     ].map((item, i) => (
                         <div key={i} className="relative flex items-start sm:items-center sm:gap-x-8 mb-12">
-                            <div className={`hidden sm:flex w-1/2 ${i % 2 === 0 ? 'justify-end' : ''}`}>
+                            <div className="hidden sm:flex w-1/2 ${i % 2 === 0 ? 'justify-end' : ''}">
                                 {i % 2 !== 0 && (
                                     <div className="w-full p-6 bg-base-50 dark:bg-base-800/50 rounded-xl border border-base-200 dark:border-base-700 shadow-sm">
                                         <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-2">{item.title}</h3>

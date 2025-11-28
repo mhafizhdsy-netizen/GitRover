@@ -1,7 +1,7 @@
 
 
 import axios from 'axios';
-import { Repo, Content, Commit, Issue, PullRequest, Contributor, RepoSearchResult, Branch, UserProfile, Release, WorkflowRun, Deployment, DeploymentStatus, CompareResult, Gist } from '../types';
+import { Repo, Content, Commit, Issue, PullRequest, Contributor, RepoSearchResult, Branch, UserProfile, Release, WorkflowRun, Deployment, DeploymentStatus, CompareResult, Gist, Organization } from '../types';
 
 const API = axios.create({
   baseURL: 'https://api.github.com',
@@ -74,8 +74,11 @@ export const githubApi = {
   getUserProfile: (username: string) =>
     API.get<UserProfile>(`/users/${username}`),
 
-  getUserRepos: (username: string, page = 1) =>
-    API.get<Repo[]>(`/users/${username}/repos?sort=updated&page=${page}&per_page=12`),
+  getUserRepos: (username: string, page = 1, per_page = 12) =>
+    API.get<Repo[]>(`/users/${username}/repos?sort=updated&page=${page}&per_page=${per_page}`),
+
+  getUserOrgs: (username: string) =>
+    API.get<Organization[]>(`/users/${username}/orgs`),
 
   // --- New Endpoints ---
 

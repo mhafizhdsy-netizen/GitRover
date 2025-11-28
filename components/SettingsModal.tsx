@@ -153,7 +153,7 @@ const SettingsModal: React.FC = () => {
     <>
       <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4" onClick={closeSettingsModal}>
         <div 
-          className="bg-white dark:bg-base-900 rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[90vh] overflow-hidden animate-fade-in" 
+          className="bg-white dark:bg-base-900 rounded-2xl shadow-2xl w-full max-w-md flex flex-col max-h-[90dvh] overflow-hidden animate-fade-in" 
           onClick={(e) => e.stopPropagation()}
         >
           <header className="flex items-center justify-between p-5 border-b border-base-200 dark:border-base-800">

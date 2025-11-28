@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Zap, Shield, Smartphone, Terminal, Star, Sparkles, Layout, Globe, MessageSquare } from 'lucide-react';
@@ -5,6 +6,8 @@ import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import { GitRoverIcon } from '../assets/icon';
 import { ThemeContext } from '../contexts/ThemeContext';
+import SEO from '../components/common/SEO';
+import { createWebSiteSchema } from '../utils/structuredData';
 
 // New Component for Scroll Animations
 const RevealOnScroll = ({ 
@@ -78,7 +81,7 @@ const FeatureCard: React.FC<{ icon: React.ElementType, title: string, desc: stri
 );
 
 const TestimonialCard: React.FC<{ name: string, role: string, text: string, avatar: string }> = ({ name, role, text, avatar }) => (
-  <div className="bg-base-50 dark:bg-base-900/50 p-6 rounded-2xl relative h-full">
+  <div className="bg-white dark:bg-base-900/80 p-6 rounded-2xl relative h-full w-96 flex-shrink-0 border border-base-200 dark:border-base-800 shadow-sm backdrop-blur-md">
     <div className="flex items-center mb-4">
       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary overflow-hidden mr-3">
         <img src={avatar} alt={name} className="w-full h-full object-cover" />
@@ -94,6 +97,24 @@ const TestimonialCard: React.FC<{ name: string, role: string, text: string, avat
     <p className="text-gray-600 dark:text-base-300 text-sm italic">"{text}"</p>
   </div>
 );
+
+const testimonials = [
+    { name: "Elena Rodriguez", role: "AI/ML Engineer", text: "The AI code explanations are incredibly accurate. It's like having a senior dev on call 24/7. Saves me hours of deciphering complex algorithms.", avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&q=80" },
+    { name: "Ben Carter", role: "DevOps Specialist", text: "GitRover is blazing fast. The clean interface makes navigating large monorepos a breeze. The repo health check is a nice touch for quick assessments.", avatar: "https://images.unsplash.com/photo-1557862921-37829c790f19?auto=format&fit=crop&w=100&q=80" },
+    { name: "Aisha Khan", role: "Cybersecurity Analyst", text: "I value the client-side approach. Knowing my PAT never leaves my browser gives me peace of mind. It's secure by design.", avatar: "https://images.unsplash.com/photo-1542596768-5d1d21f1cf98?auto=format&fit=crop&w=100&q=80" },
+    { name: "Marcus Chen", role: "Product Manager", text: "The repo summary feature is fantastic for getting a high-level overview of a new project without digging through the entire README.", avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=100&q=80" },
+    { name: "Sophie Dubois", role: "UX/UI Designer", text: "Finally, a GitHub client that looks and feels modern. The themes are beautiful, and the mobile experience is flawless. A joy to use!", avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80" },
+    { name: "David Kim", role: "Full Stack Developer", text: "I love how fast it is compared to the native GitHub UI. The local bookmarking feature is something I didn't know I needed.", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" },
+    { name: "Isabella Rossi", role: "Data Scientist", text: "Exploring data-heavy projects is much easier with GitRover. The file viewer with syntax highlighting is perfect for Jupyter notebooks.", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" },
+    { name: "Jordan Lee", role: "Tech Lead", text: "The AI PR reviewer provides a great starting point for my team. It helps spot potential issues before human review, streamlining our workflow.", avatar: "https://images.unsplash.com/photo-1564564321837-a57b7070ac4f?auto=format&fit=crop&w=100&q=80" },
+    { name: "Chloe Garcia", role: "Coding Bootcamp Student", text: "GitRover helps me learn by stripping away the noise. The AI explanations for concepts I don't understand are a lifesaver.", avatar: "https://images.unsplash.com/photo-1521119989659-a83eee488004?auto=format&fit=crop&w=100&q=80" },
+    { name: "Kenji Tanaka", role: "Game Developer", text: "The release comparison tool is excellent for tracking changes between versions. It's much clearer than GitHub's default view.", avatar: "https://images.unsplash.com/photo-1595211877493-41a4ce1d23e4?auto=format&fit=crop&w=100&q=80" },
+    { name: "Fatima Al-Jamil", role: "Open Source Contributor", text: "A fantastic tool for the open-source community. It lowers the barrier to understanding new and complex projects. Highly recommended.", avatar: "https://images.unsplash.com/photo-1554151228-14d9def656e4?auto=format&fit=crop&w=100&q=80" },
+    { name: "Leo Maxwell", role: "Indie Hacker", text: "As a solo developer, GitRover is my go-to for quickly referencing libraries and frameworks. The Gist viewer is a huge plus.", avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=100&q=80" },
+    { name: "Nia Adebayo", role: "Mobile Developer", text: "The mobile-first design isn't just a buzzword here; it actually works beautifully on my phone for quick code checks on the go.", avatar: "https://images.unsplash.com/photo-1492681290082-e932832941e6?auto=format&fit=crop&w=100&q=80" },
+    { name: "Ryan Patel", role: "Backend Engineer", text: "The minimalist interface helps me focus on what matters: the code. No distractions, just pure performance and utility.", avatar: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=100&q=80" },
+    { name: "Olivia Wilde", role: "Frontend Engineer", text: "The code folding and syntax theme options make reading large files so much more pleasant. It's the little details that make GitRover great.", avatar: "https://images.unsplash.com/photo-1589156280159-27698a70f29e?auto=format&fit=crop&w=100&q=80" },
+];
 
 export default function LandingPage() {
   const [query, setQuery] = useState('');
@@ -118,8 +139,17 @@ export default function LandingPage() {
     '--aurora': `repeating-linear-gradient(100deg, rgb(var(--color-primary)) 10%, rgb(var(--color-secondary)) 25%, rgb(var(--color-primary)) 40%)`
   } as React.CSSProperties;
 
+  const firstRow = testimonials.slice(0, 5);
+  const secondRow = testimonials.slice(5, 10);
+  const thirdRow = testimonials.slice(10, 15);
+
   return (
     <div className="min-h-screen flex flex-col bg-base-50 dark:bg-base-950 overflow-x-hidden">
+      <SEO 
+        title="GitRover - Explore Code. Understand Faster." 
+        description="A minimalist, AI-powered way to browse GitHub. Analyze repositories, generate summaries, and explain code instantly with Google Gemini."
+        schema={createWebSiteSchema()}
+      />
       <Header />
       
       {/* Hero Section */}
@@ -296,41 +326,46 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 bg-white dark:bg-base-950">
+      <section className="py-24 bg-base-50 dark:bg-base-900/30 overflow-hidden">
         <div className="container mx-auto px-4">
           <RevealOnScroll>
             <div className="text-center mb-16">
-                <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">Loved by Developers</h2>
+                <h2 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">Loved by Developers Worldwide</h2>
                 <p className="text-gray-600 dark:text-base-400">Join thousands of developers exploring code the modern way.</p>
             </div>
           </RevealOnScroll>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <RevealOnScroll delay={0} direction="up">
-                <TestimonialCard 
-                name="Sarah Jenkins"
-                role="Frontend Engineer"
-                text="The AI explanation feature is a game changer. I use it to quickly understand complex utility functions in open source repos."
-                avatar="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80"
-                />
-            </RevealOnScroll>
-            <RevealOnScroll delay={100} direction="up">
-                <TestimonialCard 
-                name="David Chen"
-                role="Full Stack Dev"
-                text="I love how fast it is compared to the native GitHub UI. The dark mode implementation is also spot on."
-                avatar="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=100&q=80"
-                />
-            </RevealOnScroll>
-            <RevealOnScroll delay={200} direction="up">
-                <TestimonialCard 
-                name="Alex Rivera"
-                role="Student"
-                text="GitRover helps me learn by stripping away the noise. The Repo Health check gave me great tips for my own projects."
-                avatar="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80"
-                />
-            </RevealOnScroll>
-          </div>
+        </div>
+
+        <div className="relative">
+            <div className="space-y-12 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+                {/* Row 1 */}
+                <div className="flex overflow-hidden">
+                    <div className="flex space-x-12 animate-marquee-right [animation-duration:60s]">
+                        {firstRow.map((t, i) => <TestimonialCard key={i} {...t} />)}
+                    </div>
+                    <div className="flex space-x-12 animate-marquee-right [animation-duration:60s]" aria-hidden="true">
+                        {firstRow.map((t, i) => <TestimonialCard key={i} {...t} />)}
+                    </div>
+                </div>
+                {/* Row 2 */}
+                <div className="flex overflow-hidden">
+                    <div className="flex space-x-12 animate-marquee-left [animation-duration:50s]">
+                        {secondRow.map((t, i) => <TestimonialCard key={i} {...t} />)}
+                    </div>
+                    <div className="flex space-x-12 animate-marquee-left [animation-duration:50s]" aria-hidden="true">
+                        {secondRow.map((t, i) => <TestimonialCard key={i} {...t} />)}
+                    </div>
+                </div>
+                {/* Row 3 */}
+                <div className="flex overflow-hidden">
+                    <div className="flex space-x-12 animate-marquee-right [animation-duration:70s]">
+                        {thirdRow.map((t, i) => <TestimonialCard key={i} {...t} />)}
+                    </div>
+                    <div className="flex space-x-12 animate-marquee-right [animation-duration:70s]" aria-hidden="true">
+                        {thirdRow.map((t, i) => <TestimonialCard key={i} {...t} />)}
+                    </div>
+                </div>
+            </div>
         </div>
       </section>
 

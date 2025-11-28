@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Sparkles, AlertTriangle, GitPullRequest } from 'lucide-react';
 import { aiService, PRContext } from '../services/aiService';
 import { githubApi } from '../services/githubApi';
@@ -50,10 +51,13 @@ const AIPrReviewModal: React.FC<AIPrReviewModalProps> = ({ pr, owner, repo, onCl
     generateReview();
   }, [pr, owner, repo]);
 
-  return (
+  const portalRoot = document.getElementById('portal-root');
+  if (!portalRoot) return null;
+
+  return createPortal(
     <div className="fixed inset-0 bg-black/60 z-[70] flex justify-center items-center p-4 animate-fade-in" onClick={onClose}>
       <div 
-        className="bg-white dark:bg-base-900 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85vh] overflow-hidden border border-base-200 dark:border-base-800" 
+        className="bg-white dark:bg-base-900 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85dvh] overflow-hidden border border-base-200 dark:border-base-800" 
         onClick={(e) => e.stopPropagation()}
       >
         <header className="flex items-center justify-between p-5 border-b border-base-200 dark:border-base-800 flex-shrink-0 bg-base-50 dark:bg-base-950">
@@ -100,7 +104,8 @@ const AIPrReviewModal: React.FC<AIPrReviewModalProps> = ({ pr, owner, repo, onCl
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    portalRoot
   );
 };
 

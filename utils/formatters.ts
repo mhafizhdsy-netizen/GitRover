@@ -39,3 +39,17 @@ export const formatRelativeTime = (dateString: string): string => {
 
   return `${Math.floor(seconds)} seconds ago`;
 };
+
+export const rgbStringToHex = (rgb: string): string => {
+  if (!rgb) return '#3b82f6';
+  const parts = rgb.trim().split(' ').map(Number);
+  if (parts.length < 3) return '#3b82f6';
+  
+  const [r, g, b] = parts;
+  if (isNaN(r) || isNaN(g) || isNaN(b)) return '#3b82f6';
+  
+  // Ensure values are within 0-255
+  const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v)));
+  
+  return "#" + ((1 << 24) + (clamp(r) << 16) + (clamp(g) << 8) + clamp(b)).toString(16).slice(1);
+};

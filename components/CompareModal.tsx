@@ -150,7 +150,7 @@ const CompareModal: React.FC<CompareModalProps> = ({ owner, repo, base: initialB
   return (
     <div className="fixed inset-0 bg-base-950/60 backdrop-blur-sm z-50 flex justify-center items-center p-4 animate-fade-in" onClick={onClose}>
       <div 
-        className="bg-white dark:bg-base-950 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden border border-base-200 dark:border-base-800" 
+        className="bg-white dark:bg-base-950 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90dvh] flex flex-col overflow-hidden border border-base-200 dark:border-base-800" 
         onClick={(e) => e.stopPropagation()}
       >
         {/* --- Header Section --- */}

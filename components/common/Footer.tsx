@@ -5,6 +5,7 @@ import { Github, Instagram, Heart } from 'lucide-react';
 
 const Footer: React.FC = () => {
   const location = useLocation();
+  const currentYear = new Date().getFullYear();
   
   // Pages that require the full, detailed footer
   const fullFooterRoutes = ['/', '/about', '/terms', '/docs', '/roadmap', '/license'];
@@ -24,7 +25,7 @@ const Footer: React.FC = () => {
             </nav>
             
             <div className="flex items-center space-x-3 text-xs text-gray-400 dark:text-gray-500">
-                <span>&copy; {new Date().getFullYear()} GitRover</span>
+                <span>&copy; {currentYear} GitRover</span>
                 <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
                 <span className="flex items-center">
                     Made with <Heart size={10} className="mx-1 text-red-500 fill-red-500" /> by <strong className="ml-1 text-gray-500 dark:text-gray-400">RioDev</strong>
@@ -105,7 +106,7 @@ const Footer: React.FC = () => {
 
         {/* Bottom Footer */}
         <div className="border-t border-base-200 dark:border-base-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 dark:text-base-500">
-          <p>&copy; {new Date().getFullYear()} GitRover. All rights reserved.</p>
+          <p>&copy; {currentYear} GitRover. All rights reserved.</p>
           <div className="flex items-center mt-4 md:mt-0 bg-base-100 dark:bg-base-900 px-4 py-1.5 rounded-full border border-base-200 dark:border-base-800">
             <span className="text-xs">Made with</span>
             <Heart size={12} className="mx-1.5 text-red-500 fill-red-500 animate-pulse" />

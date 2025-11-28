@@ -259,10 +259,10 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
     <>
         <div className="fixed inset-0 bg-black/60 z-[60] flex justify-center items-center p-4 animate-fade-in" onClick={onClose}>
             <div 
-                className="bg-white dark:bg-base-900 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col relative" 
+                className="bg-white dark:bg-base-900 rounded-lg shadow-xl w-full max-w-4xl max-h-[90dvh] flex flex-col relative overflow-hidden" 
                 onClick={(e) => e.stopPropagation()}
             >
-                <header className="flex items-center justify-between p-4 border-b border-base-200 dark:border-base-800">
+                <header className="flex items-center justify-between p-4 border-b border-base-200 dark:border-base-800 flex-shrink-0">
                 <div className="flex items-center text-sm font-semibold truncate text-gray-800 dark:text-gray-100">
                     <FileIcon size={16} className="mr-2 text-gray-500" />
                     <span className="truncate">{file.path}</span>
@@ -286,16 +286,24 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
                     {renderContent()}
                 </div>
 
-                {/* Floating AI Action Dock - Centered at bottom of modal */}
+                {/* Floating AI Action Dock - Cleaner & Simpler */}
                 {selectedText && (
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 animate-fade-in">
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 animate-fade-in">
+                        <svg width="0" height="0">
+                            <defs>
+                                <linearGradient id="ai-btn-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#3b82f6" />
+                                    <stop offset="100%" stopColor="#8b5cf6" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
                         <button
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={() => setIsModalOpen(true)}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 ring-2 ring-white/20"
+                            className="p-2 rounded-full bg-transparent hover:scale-110 transition-transform duration-300 drop-shadow-xl"
+                            title="Explain Selection"
                         >
-                            <Sparkles size={16} />
-                            Explain Selection
+                            <Sparkles size={48} style={{ fill: 'url(#ai-btn-grad)', stroke: 'none' }} className="drop-shadow-sm" />
                         </button>
                     </div>
                 )}

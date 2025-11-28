@@ -85,19 +85,21 @@ const RepoCard: React.FC<RepoCardProps> = ({ repo }) => {
         <div className="my-4 border-t border-base-100 dark:border-base-800/50 relative z-0"></div>
 
         <div className="mt-auto flex items-center justify-between">
-            <div className="relative z-10 flex items-center min-w-0 mr-4">
+            <div className="relative z-10 flex items-center min-w-0 mr-4 overflow-hidden max-w-[60%]">
                 <Link 
                     to={`/profile/${repo.owner.login}`} 
-                    className="flex items-center gap-2 hover:bg-base-100 dark:hover:bg-base-800 rounded-full pr-3 pl-1 py-1 -ml-1 transition-colors group/user max-w-full"
+                    className="flex items-center gap-2 hover:bg-base-100 dark:hover:bg-base-800 rounded-full pr-3 pl-1 py-1 -ml-1 transition-colors group/user w-full overflow-hidden"
                 >
                     <img 
                         src={repo.owner.avatar_url} 
                         alt={repo.owner.login} 
-                        className="w-5 h-5 rounded-full border border-base-200 dark:border-base-700 flex-shrink-0" 
+                        className="w-5 h-5 rounded-full border border-base-200 dark:border-base-700 flex-shrink-0 bg-white dark:bg-base-900 z-10" 
                     />
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 group-hover/user:text-primary transition-colors truncate">
-                        {repo.owner.login}
-                    </span>
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400 group-hover/user:text-primary transition-colors block truncate group-hover/user:animate-marquee-right [animation-duration:15s]">
+                            {repo.owner.login}
+                        </span>
+                    </div>
                 </Link>
             </div>
 

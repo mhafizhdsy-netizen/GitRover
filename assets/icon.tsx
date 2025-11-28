@@ -5,8 +5,8 @@ export const GitRoverIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => 
   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" {...props}>
     <defs>
       <linearGradient id="icon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style={{ stopColor: '#3b82f6', stopOpacity: 1 }} />
-        <stop offset="100%" style={{ stopColor: '#8b5cf6', stopOpacity: 1 }} />
+        <stop offset="0%" style={{ stopColor: 'rgb(var(--color-primary))', stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: 'rgb(var(--color-secondary))', stopOpacity: 1 }} />
       </linearGradient>
       <filter id="glow">
         <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
@@ -39,8 +39,8 @@ export const GitRoverLoadingIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({ c
   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
     <defs>
         <linearGradient id="load-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-             <stop offset="0%" style={{ stopColor: '#3b82f6', stopOpacity: 1 }} />
-             <stop offset="100%" style={{ stopColor: '#8b5cf6', stopOpacity: 1 }} />
+             <stop offset="0%" style={{ stopColor: 'rgb(var(--color-primary))', stopOpacity: 1 }} />
+             <stop offset="100%" style={{ stopColor: 'rgb(var(--color-secondary))', stopOpacity: 1 }} />
         </linearGradient>
     </defs>
     <g transform="translate(50 50)">

@@ -19,13 +19,21 @@ GitRover is designed to enhance the experience of reading and understanding code
 
 -   **✨ Minimalist UI**: A clean, distraction-free interface that puts the content first. Dark mode is a first-class citizen.
 -   **⚡ Blazing Fast**: Built with modern tools for near-instant page loads and a fluid user experience.
--   **🤖 AI-Powered Insights**:
+-   **🤖 AI-Powered Insights (Powered by Google Gemini)**:
     -   **Summarize Repo**: Get a concise, AI-generated summary of any repository.
     -   **Explain Code**: Select any code snippet to receive a detailed explanation in plain English.
     -   **Repo Health Check**: Quickly assess a repository's documentation quality and potential red flags.
--   **📂 Advanced File Explorer**: Navigate code with a responsive file tree, branch selector, and folder size calculations.
--   **🎨 Customizable Themes**: Personalize your code-viewing experience with multiple syntax highlighting themes and color palettes.
+    -   **AI PR Reviewer**: Get instant AI summaries of Open Pull Requests to understand the impact of changes.
+-   **📂 Advanced File Explorer**: 
+    -   Navigate code with a responsive file tree and branch selector.
+    -   **Smart Sorting**: Sort files by Last Modified Date, Name, or Size.
+    -   **Folder Size Calculation**: See the total size of directories at a glance.
+-   **🎨 Customizable Themes**: Personalize your code-viewing experience with multiple color palettes and syntax highlighting themes.
 -   **🔒 Secure & Private**: Your GitHub tokens are stored exclusively in your browser's local storage and never leave your device.
+-   **🔖 Local Bookmarks**: Save your favorite repositories and gists locally in your browser for one-click access.
+-   **📦 Gist Support**: Full support for viewing and analyzing Gists with the same powerful tools, including AI explanations.
+-   **↔️ Release Comparison**: Compare version differences between any two releases to see what changed in commits and files.
+-   **🌐 SEO Optimized**: Dynamic meta tags and JSON-LD structured data for rich search engine results and improved social sharing.
 
 ## 🛠️ Tech Stack
 

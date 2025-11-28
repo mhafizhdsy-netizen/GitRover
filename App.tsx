@@ -20,8 +20,9 @@ import SettingsModal from './components/SettingsModal';
 import { ToastContainer } from './components/common/Toast';
 import BackToTop from './components/common/BackToTop';
 import CookieConsent from './components/common/CookieConsent';
-import ScrollToTop from './components/common/ScrollToTop'; // Import ScrollToTop
+import ScrollToTop from './components/common/ScrollToTop'; 
 import { themes } from './themes';
+import { rgbStringToHex } from './utils/formatters';
 
 export default function App() {
   const [themeName, setThemeName] = useState<ThemeName>(() => {
@@ -68,7 +69,53 @@ export default function App() {
       root.style.setProperty(`--color-base-${shade}`, value as string);
     });
 
-    // 3. Persist choices to local storage
+    // 3. Update Favicon dynamically
+    const primaryHex = rgbStringToHex(palette.primary);
+    const secondaryHex = rgbStringToHex(palette.secondary);
+    
+    const svgIcon = `
+      <svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'>
+        <defs>
+          <linearGradient id='icon-grad' x1='0%' y1='0%' x2='100%' y2='100%'>
+            <stop offset='0%' style='stop-color:${primaryHex};stop-opacity:1' />
+            <stop offset='100%' style='stop-color:${secondaryHex};stop-opacity:1' />
+          </linearGradient>
+          <filter id='glow'>
+            <feGaussianBlur stdDeviation='2.5' result='coloredBlur'/>
+            <feMerge>
+              <feMergeNode in='coloredBlur'/>
+              <feMergeNode in='SourceGraphic'/>
+            </feMerge>
+          </filter>
+        </defs>
+        <g fill='url(#icon-grad)' transform='translate(50 50)'>
+          <g transform='rotate(30)'>
+            <path d='M-23 -40 L23 -40 L46 0 L23 40 L-23 40 L-46 0 Z' fill-opacity='0.1'/>
+            <path d='M0 0 L23 -40 L46 0 L23 40 Z' filter='url(#glow)' />
+            <path d='M0 0 L-23 40 L-46 0 L-23 -40 Z' />
+            <path d='M-23 -40 L-11.5 -20 L11.5 -20 L23 -40 Z' fill-opacity='0.5'/>
+            <path d='M-23 40 L-11.5 20 L11.5 20 L23 40 Z' fill-opacity='0.5'/>
+          </g>
+        </g>
+      </svg>
+    `.trim();
+
+    const encodedSvg = encodeURIComponent(svgIcon)
+        .replace(/'/g, '%27')
+        .replace(/"/g, '%22');
+    
+    // Completely remove existing favicons to force browser update
+    const existingLinks = document.querySelectorAll("link[rel*='icon']");
+    existingLinks.forEach(l => l.remove());
+
+    // Create and append new favicon link
+    const link = document.createElement('link');
+    link.type = 'image/svg+xml';
+    link.rel = 'icon';
+    link.href = `data:image/svg+xml;charset=utf-8,${encodedSvg}`;
+    document.head.appendChild(link);
+
+    // 4. Persist choices to local storage
     try {
       localStorage.setItem('color_theme', themeName);
       localStorage.setItem('theme_mode', mode);

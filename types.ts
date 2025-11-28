@@ -1,6 +1,5 @@
 
 
-
 export interface Repo {
   id: number;
   name: string;
@@ -75,9 +74,19 @@ export interface Issue {
     name: string;
     color: string;
   }[];
+  body: string | null;
 }
 
-export interface PullRequest extends Issue {}
+export interface PullRequest extends Issue {
+  merged_at?: string | null;
+}
+
+export interface Organization {
+  id: number;
+  login: string;
+  avatar_url: string;
+  description: string | null;
+}
 
 export interface Branch {
   name:string;
@@ -112,6 +121,9 @@ export interface UserProfile {
   followers: number;
   following: number;
   created_at: string;
+  updated_at: string;
+  hireable: boolean | null;
+  type: string;
 }
 
 // --- New Types for Releases, Builds, and Deployments ---

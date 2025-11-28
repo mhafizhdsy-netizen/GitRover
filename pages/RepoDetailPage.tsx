@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
@@ -18,6 +19,8 @@ import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import ErrorDisplay from '../components/common/ErrorDisplay';
 import CustomLoader from '../components/common/CustomLoader';
+import SEO from '../components/common/SEO';
+import { createRepoSchema } from '../utils/structuredData';
 
 const TABS = [
   { name: 'Code', icon: Code },
@@ -239,8 +242,15 @@ export default function RepoDetailPage() {
     }
   };
 
+  const repoSchema = createRepoSchema(repo);
+
   return (
     <div className="flex flex-col min-h-screen">
+      <SEO 
+        title={`${repo.name} (${owner}) - GitRover`} 
+        description={repo.description || `Browse the ${repo.name} repository by ${owner} on GitRover.`}
+        schema={repoSchema}
+      />
       <Header />
       <div className={`container mx-auto px-4 py-8 transition-opacity duration-300 flex-grow ${isContentLoaded ? 'opacity-100' : 'opacity-0'}`}>
         <RepoHeader repo={repo} />
@@ -253,10 +263,10 @@ export default function RepoDetailPage() {
                   <button
                     key={tab.name}
                     onClick={() => setActiveTab(tab.name)}
-                    className={`flex items-center whitespace-nowrap py-2.5 px-4 font-medium text-sm transition-colors rounded-t-lg
+                    className={`flex items-center whitespace-nowrap py-2.5 px-4 font-medium text-sm rounded-t-lg transition-all duration-300 ease-in-out relative overflow-hidden
                       ${activeTab === tab.name
                         ? 'bg-base-100 dark:bg-base-900 text-primary border-b-2 border-primary'
-                        : 'text-gray-500 hover:text-gray-800 dark:text-base-400 dark:hover:text-white hover:bg-base-50 dark:hover:bg-base-800'
+                        : 'text-gray-500 hover:text-gray-800 dark:text-base-400 dark:hover:text-white hover:bg-base-50 dark:hover:bg-base-800 border-b-2 border-transparent'
                       }`}
                   >
                     <tab.icon size={16} className="mr-2" />

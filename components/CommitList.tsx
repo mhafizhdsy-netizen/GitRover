@@ -75,7 +75,12 @@ const CommitList: React.FC<CommitListProps> = ({ owner, repo }) => {
                 <div className="w-8 h-8 rounded-full bg-base-200 dark:bg-base-700 flex-shrink-0"></div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-800 dark:text-base-100 break-words hover:text-primary transition-colors cursor-pointer">{commit.commit.message.split('\n')[0]}</p>
+                <p 
+                    className="font-medium text-gray-800 dark:text-base-100 hover:text-primary transition-colors cursor-pointer truncate"
+                    title={commit.commit.message}
+                >
+                    {commit.commit.message.split('\n')[0]}
+                </p>
                 <div className="text-xs text-gray-500 dark:text-base-400 mt-1 flex items-center flex-wrap">
                   {commit.author?.login ? (
                     <Link to={`/profile/${commit.author.login}`} className="font-semibold hover:underline text-gray-700 dark:text-base-300">{commit.commit.author.name}</Link>

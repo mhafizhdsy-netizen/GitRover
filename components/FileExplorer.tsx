@@ -141,16 +141,19 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ owner, name, path, branch, 
       });
     }
     result.sort((a, b) => {
+      // Always keep directories on top for typical file explorer behavior
       if (a.type === 'dir' && b.type !== 'dir') return -1;
       if (a.type !== 'dir' && b.type === 'dir') return 1;
+
       const getSize = (item: Content) => (item.type === 'dir' ? folderSizes[item.path] || 0 : item.size);
       const getDate = (item: Content) => (fileDates[item.path] ? new Date(fileDates[item.path]).getTime() : 0);
+      
       switch (sortOption) {
         case 'name-desc': return b.name.localeCompare(a.name);
         case 'size-asc': return getSize(a) - getSize(b);
         case 'size-desc': return getSize(b) - getSize(a);
-        case 'date-asc': return getDate(a) - getDate(b);
-        case 'date-desc': return getDate(b) - getDate(a);
+        case 'date-asc': return getDate(a) - getDate(b); // Oldest first
+        case 'date-desc': return getDate(b) - getDate(a); // Newest first
         case 'name-asc': default: return a.name.localeCompare(b.name);
       }
     });
@@ -249,10 +252,18 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ owner, name, path, branch, 
            <div className="relative" ref={sortDropdownRef}>
              <button onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)} className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-white dark:bg-base-800 border border-base-300 dark:border-base-700 rounded-lg hover:bg-base-50 dark:hover:bg-base-700 transition-colors text-gray-600 dark:text-base-300">
                <ArrowUpDown size={14} />
+               <span className="hidden sm:inline">Sort</span>
              </button>
              {isSortDropdownOpen && (
-                <div className="absolute right-0 mt-1 w-40 bg-white dark:bg-base-900 border border-base-200 dark:border-base-700 rounded-lg shadow-xl z-20 animate-fade-in p-1">
-                  {[{ id: 'name-asc', label: 'Name (A-Z)' }, { id: 'name-desc', label: 'Name (Z-A)' }, { id: 'size-asc', label: 'Size (Smallest)' }, { id: 'size-desc', label: 'Size (Largest)' }, { id: 'date-desc', label: 'Date (Newest)' }, { id: 'date-asc', label: 'Date (Oldest)' }].map((item) => (
+                <div className="absolute right-0 mt-1 w-48 bg-white dark:bg-base-900 border border-base-200 dark:border-base-700 rounded-lg shadow-xl z-20 animate-fade-in p-1">
+                  {[
+                    { id: 'name-asc', label: 'Name (A-Z)' }, 
+                    { id: 'name-desc', label: 'Name (Z-A)' }, 
+                    { id: 'size-asc', label: 'Size (Smallest)' }, 
+                    { id: 'size-desc', label: 'Size (Largest)' }, 
+                    { id: 'date-desc', label: 'Last Modified' }, // Changed Label for clarity
+                    { id: 'date-asc', label: 'Oldest First' }
+                  ].map((item) => (
                     <button key={item.id} onClick={() => { setSortOption(item.id as SortOption); setIsSortDropdownOpen(false); }} className={`w-full text-left px-2 py-1.5 text-xs rounded-md flex items-center justify-between ${sortOption === item.id ? 'bg-primary/10 text-primary' : 'text-gray-700 dark:text-base-300 hover:bg-base-50 dark:hover:bg-base-800'}`}>
                        <span>{item.label}</span>
                        {sortOption === item.id && <Check size={12} />}
@@ -267,9 +278,9 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ owner, name, path, branch, 
       {/* Header Row for columns (Visible on desktop) */}
       <div className="hidden sm:flex items-center justify-between px-4 py-2 bg-base-50 dark:bg-base-800/50 border-b border-base-200 dark:border-base-700 text-xs font-semibold text-gray-500 dark:text-gray-400">
          <span className="flex-1">Name</span>
-         <div className="flex items-center gap-6 min-w-[200px] justify-end">
-            <span className="w-32 text-right">Last Modified</span>
-            <span className="w-16 text-right">Size</span>
+         <div className="flex items-center gap-4 flex-shrink-0 justify-end">
+            <span className="w-36 text-right">Last Modified</span>
+            <span className="w-20 text-right">Size</span>
          </div>
       </div>
 
@@ -295,22 +306,22 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ owner, name, path, branch, 
                 <span className="text-sm text-gray-700 dark:text-gray-200 truncate group-hover:text-primary transition-colors font-medium">{item.name}</span>
               </div>
               
-              <div className="flex items-center gap-6 flex-shrink-0 min-w-[200px] justify-end">
-                 {/* Timestamp Column */}
-                 <div className="text-xs text-gray-400 dark:text-gray-500 w-32 text-right">
+              <div className="flex items-center gap-4 flex-shrink-0 justify-end">
+                 {/* Timestamp Column - Hidden on mobile for cleaner look */}
+                 <div className="hidden sm:flex text-xs text-gray-400 dark:text-gray-500 w-36 text-right justify-end">
                      {fileDates[item.path] ? (
                          <span className="truncate block" title={new Date(fileDates[item.path]).toLocaleString()}>
                              {formatRelativeTime(fileDates[item.path])}
                          </span>
                      ) : (
-                         <span className="opacity-0 group-hover:opacity-50 transition-opacity flex items-center justify-end">
+                         <span className="opacity-0 group-hover:opacity-50 transition-opacity flex items-center">
                             <Clock size={10} className="mr-1" /> ...
                          </span>
                      )}
                  </div>
 
                  {/* File Size Column */}
-                 <div className="text-xs text-gray-500 dark:text-gray-400 font-mono w-16 text-right">
+                 <div className="text-xs text-gray-500 dark:text-gray-400 font-mono w-20 text-right">
                     {item.type === 'dir' ? (folderSizes[item.path] ? formatFileSize(folderSizes[item.path]) : '-') : formatFileSize(item.size)}
                  </div>
               </div>

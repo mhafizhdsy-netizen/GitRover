@@ -1,10 +1,34 @@
 
-
 import { GoogleGenAI } from "@google/genai";
 
 // Initialize the GoogleGenAI client with the API key from process.env.
 // Per guidelines, we assume process.env.API_KEY is available and valid.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+/**
+ * Parses raw API errors into friendly, human-readable messages.
+ */
+function getFriendlyErrorMessage(error: any): string {
+    const msg = error?.message || error?.toString() || '';
+
+    if (msg.includes('429') || msg.includes('Quota exceeded')) {
+        return "⚠️ **Brain Freeze:** The AI has reached its daily thinking limit. Please try again later or check your API quota.";
+    }
+    
+    if (msg.includes('503') || msg.includes('Overloaded')) {
+        return "😴 **AI is Nap-taking:** The model is currently overloaded with requests. Please try again in a few moments.";
+    }
+
+    if (msg.includes('API key not valid') || msg.includes('API_KEY')) {
+        return "🔑 **Key Issue:** The API key appears to be missing or invalid. Please check your settings.";
+    }
+
+    if (msg.includes('candidate') && msg.includes('safety')) {
+        return "🛡️ **Safety Shield:** The AI could not generate a response because the content triggered safety filters.";
+    }
+
+    return "🤖 **Hiccup:** The AI encountered an unexpected error. It might be a temporary glitch.";
+}
 
 /**
  * Runs a given prompt against the Gemini API using the Thinking model.
@@ -23,10 +47,15 @@ async function runPrompt(prompt: string): Promise<string> {
                 // Explicitly NOT setting maxOutputTokens as per instructions to avoid conflict with thinking budget
             }
         });
-        return response.text ?? "The AI returned an empty response.";
+        
+        if (!response.text) {
+            return "🤔 The AI thought about it but didn't have anything to say. Try rephrasing your request.";
+        }
+
+        return response.text;
     } catch (error: any) {
         console.error("Error calling Gemini API:", error);
-        return `⚠️ **AI Error**: An error occurred while contacting the AI service.\n\nError details: ${error.message || error.toString()}`;
+        return getFriendlyErrorMessage(error);
     }
 }
 

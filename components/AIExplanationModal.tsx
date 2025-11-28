@@ -32,7 +32,7 @@ const AIExplanationModal: React.FC<AIExplanationModalProps> = ({ codeSnippet, on
   return (
     <div className="fixed inset-0 bg-black/60 z-[60] flex justify-center items-center p-4 animate-fade-in" onClick={onClose}>
       <div 
-        className="bg-white dark:bg-base-900 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85vh] overflow-hidden border border-base-200 dark:border-base-800" 
+        className="bg-white dark:bg-base-900 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85dvh] overflow-hidden border border-base-200 dark:border-base-800" 
         onClick={(e) => e.stopPropagation()}
       >
         <header className="flex items-center justify-between p-5 border-b border-base-200 dark:border-base-800 flex-shrink-0 bg-base-50 dark:bg-base-950">

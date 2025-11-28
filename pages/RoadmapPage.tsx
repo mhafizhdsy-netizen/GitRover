@@ -1,7 +1,8 @@
+
 import React from 'react';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
-import { MessageSquare, Share2, GitPullRequest, Bookmark, CheckCircle2, Circle, Clock } from 'lucide-react';
+import { MessageSquare, Share2, GitPullRequest, Bookmark, CheckCircle2, Circle, Clock, FileCode, ArrowLeftRight, FolderTree } from 'lucide-react';
 
 const RoadmapItem: React.FC<{ 
   icon: React.ElementType, 
@@ -79,18 +80,6 @@ export default function RoadmapPage() {
                     status="planned"
                     desc="Interactive 2D/3D node graphs to visualize file dependencies and project architecture at a glance."
                 />
-                <RoadmapItem 
-                    icon={GitPullRequest}
-                    title="AI PR Reviewer"
-                    status="planned"
-                    desc="Get instant AI summaries of Open Pull Requests to understand the impact of changes before you review the code."
-                />
-                <RoadmapItem 
-                    icon={Bookmark}
-                    title="Local Collections"
-                    status="planned"
-                    desc="Create custom lists and bookmarks for repositories locally in your browser, without needing a GitHub account."
-                />
               </div>
             </section>
 
@@ -102,16 +91,34 @@ export default function RoadmapPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <RoadmapItem 
-                    icon={Share2}
-                    title="Repo Summarizer"
+                    icon={GitPullRequest}
+                    title="AI PR Reviewer"
                     status="completed"
-                    desc="Successfully implemented AI-based summarization of README files and metadata."
+                    desc="Get instant AI summaries of Open Pull Requests to understand the impact of changes before you review the code."
                 />
                  <RoadmapItem 
-                    icon={Share2}
-                    title="Dark Mode"
+                    icon={Bookmark}
+                    title="Local Bookmarks"
                     status="completed"
-                    desc="Full dark mode support with system preference detection."
+                    desc="Save repositories and gists locally in your browser for quick access without needing a GitHub account."
+                />
+                 <RoadmapItem 
+                    icon={FileCode}
+                    title="Gist Explorer"
+                    status="completed"
+                    desc="Full support for viewing user Gists, including AI explanations for code snippets."
+                />
+                 <RoadmapItem 
+                    icon={ArrowLeftRight}
+                    title="Release Comparison"
+                    status="completed"
+                    desc="Compare version differences between any two releases to see what changed in commits and files."
+                />
+                 <RoadmapItem 
+                    icon={FolderTree}
+                    title="Advanced File Explorer"
+                    status="completed"
+                    desc="Improved sorting (Last Modified), filtering, and layout for better file navigation."
                 />
               </div>
             </section>

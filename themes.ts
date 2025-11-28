@@ -1,3 +1,4 @@
+
 export type ThemeMode = 'light' | 'dark';
 
 export interface ThemePalette {
@@ -79,14 +80,20 @@ export const themes: Record<string, AppTheme> = {
   ocean: {
     name: 'Ocean',
     light: {
-      primary: '20 184 166', // teal-500
-      secondary: '2 132 199', // sky-600
-      base: defaultLightBase,
+      primary: '6 182 212', // cyan-500 (Vibrant)
+      secondary: '37 99 235', // blue-600 (Deep Blue)
+      base: {
+        '50': '236 254 255', '100': '207 250 254', '200': '165 243 252', '300': '103 232 249',
+        '700': '14 116 144', '800': '21 94 117', '900': '22 78 99', '950': '8 51 68'
+      },
     },
     dark: {
-      primary: '45 212 191', // teal-400
-      secondary: '14 165 233', // sky-500
-      base: defaultDarkBase,
+      primary: '34 211 238', // cyan-400
+      secondary: '96 165 250', // blue-400
+      base: {
+        '50': '240 253 250', '100': '204 251 241', '200': '153 246 228', '300': '94 234 212',
+        '700': '15 118 110', '800': '17 94 89', '900': '19 78 74', '950': '4 47 46'
+      },
     }
   },
   matrix: {
@@ -165,19 +172,33 @@ export const themes: Record<string, AppTheme> = {
   nordic: {
     name: 'Nordic',
     light: {
-      primary: '94 129 172',
-      secondary: '143 188 187',
+      primary: '94 129 172', // #5E81AC (Frost Blue)
+      secondary: '136 192 208', // #88C0D0 (Frost Cyan)
       base: {
-        '50': '248 249 252', '100': '236 239 244', '200': '224 229 238', '300': '216 222 233',
-        '700': '76 86 106', '800': '61 70 88', '900': '59 66 82', '950': '46 52 64'
+        // Snow Storm Palette for Light Mode
+        '50': '236 239 244', // #ECEFF4
+        '100': '229 233 240', // #E5E9F0
+        '200': '216 222 233', // #D8DEE9
+        '300': '195 204 219', // Custom bridge
+        '700': '76 86 106', // #4C566A
+        '800': '67 76 94',  // #434C5E
+        '900': '59 66 82',  // #3B4252
+        '950': '46 52 64'   // #2E3440
       },
     },
     dark: {
-      primary: '129 161 193',
-      secondary: '136 192 208',
+      primary: '136 192 208', // #88C0D0 (Frost Cyan)
+      secondary: '129 161 193', // #81A1C1 (Frost Blue)
       base: {
-        '50': '248 249 252', '100': '236 239 244', '200': '224 229 238', '300': '216 222 233',
-        '700': '76 86 106', '800': '61 70 88', '900': '59 66 82', '950': '46 52 64'
+        // Polar Night Palette for Dark Mode
+        '50': '59 66 82',   // #3B4252 (Lightest Dark)
+        '100': '54 61 77',  // Custom
+        '200': '46 52 64',  // #2E3440
+        '300': '41 46 57',  // Custom
+        '700': '216 222 233', // #D8DEE9 (Text/Elements)
+        '800': '46 52 64',    // #2E3440 (Cards)
+        '900': '36 41 51',    // Darker than #2E3440 for Main BG
+        '950': '28 32 41'     // Deepest
       },
     }
   },
@@ -203,16 +224,16 @@ export const themes: Record<string, AppTheme> = {
   solarized: {
     name: 'Solarized',
     light: {
-      primary: '38 139 210', // #268bd2
-      secondary: '211 54 130', // #d33682
+      primary: '42 161 152', // #2aa198 (Cyan)
+      secondary: '38 139 210', // #268bd2 (Blue)
       base: { 
         '50': '253 246 227', '100': '238 232 213', '200': '147 161 161', '300': '131 148 150',
         '700': '101 123 131', '800': '88 110 117', '900': '7 54 66', '950': '0 43 54' 
       },
     },
     dark: {
-      primary: '38 139 210', // #268bd2
-      secondary: '211 54 130', // #d33682
+      primary: '42 161 152', // #2aa198 (Cyan)
+      secondary: '38 139 210', // #268bd2 (Blue)
       base: { 
         '50': '253 246 227', '100': '238 232 213', '200': '147 161 161', '300': '131 148 150',
         '700': '101 123 131', '800': '88 110 117', '900': '7 54 66', '950': '0 43 54' 

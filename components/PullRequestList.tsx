@@ -52,7 +52,7 @@ const PullRequestList: React.FC<PullRequestListProps> = ({ owner, repo }) => {
           <li key={pr.id} className={`p-4 flex items-start space-x-4 hover:bg-base-50 dark:hover:bg-base-800/50 transition-colors duration-300 ${index < pulls.length - 1 ? 'border-b border-gray-200 dark:border-gray-700' : ''}`}>
             {pr.state === 'open' ? (
                 <GitPullRequest className="text-green-600 mt-1 flex-shrink-0" />
-            ) : (pr as any).merged_at ? (
+            ) : pr.merged_at ? (
                 <GitMerge className="text-purple-600 mt-1 flex-shrink-0" />
             ) : (
                 <GitPullRequestClosed className="text-red-600 mt-1 flex-shrink-0" />
