@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
@@ -9,6 +8,7 @@ import { formatFileSize, formatRelativeTime } from '../utils/formatters';
 import FileViewer from './FileViewer';
 import { useSettings } from '../contexts/SettingsContext';
 import CustomLoader from './common/CustomLoader';
+import GoToFileModal from './GoToFileModal';
 
 interface FileExplorerProps {
   owner: string;
@@ -30,6 +30,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ owner, name, path, branch, 
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+  const [isGoToFileOpen, setIsGoToFileOpen] = useState(false);
   
   const [branchSearchTerm, setBranchSearchTerm] = useState('');
   const [fileSearchTerm, setFileSearchTerm] = useState('');
@@ -53,6 +54,20 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ owner, name, path, branch, 
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA') {
+            return;
+        }
+        if (e.key === 't') {
+            e.preventDefault();
+            setIsGoToFileOpen(true);
+        }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   useEffect(() => {
@@ -227,8 +242,16 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ owner, name, path, branch, 
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full">
-           <div className="relative group flex-grow min-w-[200px]">
-              <input type="text" value={fileSearchTerm} onChange={(e) => setFileSearchTerm(e.target.value)} placeholder="Go to file..." className="w-full pl-9 pr-3 py-1.5 text-xs bg-white dark:bg-base-900 border border-base-300 dark:border-base-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary placeholder-gray-400 dark:placeholder-gray-500 text-gray-700 dark:text-base-200" />
+           <button 
+             onClick={() => setIsGoToFileOpen(true)}
+             className="flex-grow sm:flex-grow-0 flex items-center justify-between gap-2 px-3 py-1.5 text-xs font-medium bg-white dark:bg-base-900 border border-base-300 dark:border-base-700 rounded-lg hover:bg-base-50 dark:hover:bg-base-700 transition-colors text-gray-500 dark:text-base-400 w-full sm:w-auto"
+           >
+             <span>Go to file</span>
+             <kbd className="px-1.5 py-0.5 text-[10px] font-sans font-semibold text-gray-400 bg-base-100 dark:bg-base-800 border border-base-200 dark:border-base-700 rounded">t</kbd>
+           </button>
+
+           <div className="relative group flex-grow min-w-[150px]">
+              <input type="text" value={fileSearchTerm} onChange={(e) => setFileSearchTerm(e.target.value)} placeholder="Filter current directory..." className="w-full pl-9 pr-3 py-1.5 text-xs bg-white dark:bg-base-900 border border-base-300 dark:border-base-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary placeholder-gray-400 dark:placeholder-gray-500 text-gray-700 dark:text-base-200" />
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" />
            </div>
 
@@ -335,6 +358,8 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ owner, name, path, branch, 
       </div>
 
       {selectedFile && <FileViewer owner={owner} repoName={name} file={selectedFile} branch={branch} onClose={closeFileViewer} />}
+      
+      {isGoToFileOpen && <GoToFileModal owner={owner} name={name} branch={branch} show={isGoToFileOpen} onClose={() => setIsGoToFileOpen(false)} />}
     </div>
   );
 };

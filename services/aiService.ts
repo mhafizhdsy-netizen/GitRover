@@ -1,5 +1,4 @@
-
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 
 // Initialize the GoogleGenAI client with the API key from process.env.
 // Per guidelines, we assume process.env.API_KEY is available and valid.
@@ -67,6 +66,11 @@ export interface RepoSummaryContext {
     readme: string | null;
 }
 
+export interface RepoHealthContext {
+    filePaths: string[];
+    keyFiles: { path: string; content: string }[];
+}
+
 export interface PRContext {
     title: string;
     body: string;
@@ -97,21 +101,70 @@ export const aiService = {
         return runPrompt(prompt);
     },
 
-    checkRepoHealth: (readmeContent: string): Promise<string> => {
+    checkRepoHealth: async (context: RepoHealthContext): Promise<string> => {
+        const keyFilesSummary = context.keyFiles.map(f => `
+<file path="${f.path}">
+${f.content.substring(0, 2000)}
+</file>
+`).join('\n') || 'No key files content provided.';
+
         const prompt = `
-            Analyze the health of a GitHub repository based on its README.md file. 
-            Provide a brief, two-sentence analysis covering:
-            1.  Clarity of purpose and documentation.
-            2.  Potential red flags or signs of being unmaintained (e.g., outdated info, broken links if mentioned).
+            Analyze the health of a GitHub repository based on its file structure and key file contents.
+            You must provide a detailed analysis and a numerical health score from 1 to 100.
             
-            Be constructive and focus on what a potential user or contributor should know.
+            **Analysis Context:**
+            1.  **Full File List:** A tree of all file paths in the repository has been provided.
+            2.  **Key File Contents:** Content for important files like README, package.json, etc., is available.
             
-            README Content:
-            ---
-            ${readmeContent.substring(0, 10000)}
-            ---
+            **File List Snippet (Top 100 files):**
+            <file_tree>
+            ${context.filePaths.slice(0, 100).join('\n')}
+            </file_tree>
+
+            **Key File Contents:**
+            ${keyFilesSummary}
+
+            **Scoring Criteria:**
+            - **Documentation (40%):** Assess the presence and quality of README.md, CONTRIBUTING.md, and a LICENSE file. Good documentation is clear, comprehensive, and provides setup instructions.
+            - **Structure (30%):** Evaluate the logical organization of folders (e.g., separation of 'src', 'tests', 'docs'). Does it follow common conventions for its ecosystem? A clean structure gets a higher score.
+            - **Dependencies (20%):** Look at dependency management files (like package.json, requirements.txt). Are dependencies reasonably up-to-date? Are there an excessive number of them? A well-managed project scores higher.
+            - **Testing (10%):** Check for the presence of a test suite (e.g., a 'tests' or '__tests__' directory with test files). The presence of tests significantly boosts this part of the score.
+
+            Calculate a final 'health_score' (an integer between 1 and 100) based on these weighted criteria. Your 'analysis' should be a concise paragraph in markdown summarizing your findings.
         `;
-        return runPrompt(prompt);
+
+        try {
+            const response = await ai.models.generateContent({
+                model: 'gemini-3-pro-preview',
+                contents: prompt,
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: Type.OBJECT,
+                        properties: {
+                            analysis: {
+                                type: Type.STRING,
+                                description: "A concise, one-paragraph analysis of the repository's health based on the provided context. Summarize findings on documentation, structure, and maintenance. Use markdown for formatting."
+                            },
+                            health_score: {
+                                type: Type.NUMBER,
+                                description: "A numerical score from 1 to 100 representing the repository's overall health, based on the weighted criteria."
+                            }
+                        },
+                        required: ["analysis", "health_score"]
+                    }
+                }
+            });
+
+            if (!response.text) {
+                throw new Error("The AI returned an empty response.");
+            }
+            return response.text; // Return the JSON string
+        } catch (error: any) {
+            console.error("Error calling Gemini API for repo health:", error);
+            // We want the friendly message to bubble up to the UI.
+            throw new Error(getFriendlyErrorMessage(error));
+        }
     },
 
     explainCode: (codeSnippet: string): Promise<string> => {

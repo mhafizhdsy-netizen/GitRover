@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
@@ -36,6 +35,7 @@ const ProfilePage: React.FC = () => {
     
     const [selectedGistId, setSelectedGistId] = useState<string | null>(null);
     const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+    const [graphError, setGraphError] = useState(false);
 
     const page = parseInt(searchParams.get('page') || '1', 10);
     const tabParam = searchParams.get('tab');
@@ -47,6 +47,7 @@ const ProfilePage: React.FC = () => {
         if (!username) return;
         setLoading(true);
         setError(null);
+        setGraphError(false); // Reset graph error on new profile load
         githubApi.getUserProfile(username)
             .then(response => {
                 setUser(response.data);
@@ -198,7 +199,7 @@ const ProfilePage: React.FC = () => {
                 <div className="md:grid md:grid-cols-12 md:gap-8">
                     {/* --- Left Sidebar --- */}
                     <aside className="md:col-span-4 lg:col-span-3 animate-fade-in">
-                        <div className="p-1 bg-gradient-to-br from-primary to-secondary rounded-full w-40 h-40 mx-auto md:mx-0 shadow-lg -mt-16 md:-mt-24 relative z-10">
+                        <div className="p-1 bg-gradient-to-br from-primary to-secondary rounded-full w-40 h-40 mx-auto md:mx-0 shadow-lg relative z-10">
                              <button 
                                 onClick={() => setIsAvatarModalOpen(true)}
                                 className="group w-full h-full rounded-full bg-white dark:bg-base-900 p-1 overflow-hidden"
@@ -281,13 +282,16 @@ const ProfilePage: React.FC = () => {
 
                     {/* --- Main Content --- */}
                     <div className="md:col-span-8 lg:col-span-9 mt-8 md:mt-0 animate-fade-in">
-                        <div className="mb-8">
-                             <img 
-                                src={`https://ghchart.rshah.org/${username}?theme=${mode}`} 
-                                alt={`${username}'s Contribution Graph`} 
-                                className="w-full rounded-lg border border-base-200 dark:border-base-800 p-2 bg-white dark:bg-base-900" 
-                             />
-                        </div>
+                        {!graphError && (
+                            <div className="mb-8">
+                                <img 
+                                    src={`https://ghchart.rshah.org/${username}?theme=${mode}`} 
+                                    alt={`${username}'s Contribution Graph`} 
+                                    className="w-full rounded-lg border border-base-200 dark:border-base-800 p-2 bg-white dark:bg-base-900" 
+                                    onError={() => setGraphError(true)}
+                                />
+                            </div>
+                        )}
                         
                         <div className="flex items-center border-b border-base-200 dark:border-base-800 overflow-x-auto">
                             <button

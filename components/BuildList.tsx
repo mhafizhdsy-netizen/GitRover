@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { githubApi } from '../services/githubApi';
 import { WorkflowRun } from '../types';
 import { PlayCircle, CheckCircle2, XCircle, AlertCircle, GitBranch, ServerCrash, Clock } from 'lucide-react';
@@ -97,7 +96,14 @@ const BuildList: React.FC<BuildListProps> = ({ owner, repo }) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const fetchRuns = useCallback(() => {
+  useEffect(() => {
+    setRuns([]);
+    setPage(1);
+    setHasMore(true);
+    setError(null);
+  }, [owner, repo]);
+
+  useEffect(() => {
     setLoading(true);
     githubApi.getWorkflowRuns(owner, repo, page)
       .then(response => {
@@ -116,10 +122,6 @@ const BuildList: React.FC<BuildListProps> = ({ owner, repo }) => {
       })
       .finally(() => setLoading(false));
   }, [owner, repo, page]);
-
-  useEffect(() => {
-    fetchRuns();
-  }, [fetchRuns]);
 
   if (error) {
     return <div className="text-center py-10 text-red-500 flex flex-col items-center"><ServerCrash size={48} className="mb-4" /><p>{error}</p></div>;

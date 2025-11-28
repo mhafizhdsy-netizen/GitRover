@@ -1,6 +1,4 @@
-
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
 import { PullRequest } from '../types';
@@ -22,7 +20,14 @@ const PullRequestList: React.FC<PullRequestListProps> = ({ owner, repo }) => {
   const [hasMore, setHasMore] = useState(true);
   const [selectedPr, setSelectedPr] = useState<PullRequest | null>(null);
 
-  const fetchPulls = useCallback(() => {
+  useEffect(() => {
+    setPulls([]);
+    setPage(1);
+    setHasMore(true);
+    setError(null);
+  }, [owner, repo]);
+
+  useEffect(() => {
     setLoading(true);
     githubApi.getPullRequests(owner, repo, page)
       .then(response => {
@@ -36,10 +41,6 @@ const PullRequestList: React.FC<PullRequestListProps> = ({ owner, repo }) => {
       })
       .finally(() => setLoading(false));
   }, [owner, repo, page]);
-
-  useEffect(() => {
-    fetchPulls();
-  }, [fetchPulls]);
   
   if (error) {
     return <div className="text-center py-10 text-red-500 flex flex-col items-center"><ServerCrash size={48} className="mb-4" /><p>{error}</p></div>;

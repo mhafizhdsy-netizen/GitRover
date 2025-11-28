@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useContext, useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation, useMatch } from 'react-router-dom';
 import { ThemeContext } from '../../contexts/ThemeContext';
 import { Sun, Moon, Settings, ArrowLeft, Bookmark } from 'lucide-react';
 import { GitRoverIcon } from '../../assets/icon';
@@ -11,6 +11,26 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  const onRepoPage = useMatch('/repo/:owner/:name/*');
+  const onProfilePage = useMatch('/profile/:username');
+  
+  const isHeroPage = location.pathname === '/' || location.pathname === '/about';
+  const headerPosition = isHeroPage ? 'fixed w-full' : 'sticky';
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Check on initial render
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   if (!themeContext) {
     return null;
@@ -31,23 +51,31 @@ const Header: React.FC = () => {
   const showAppControls = !staticPages.includes(location.pathname);
 
   const handleBack = () => {
-    if (window.history.state && window.history.state.idx > 0) {
+    if (onRepoPage || onProfilePage) {
+      navigate('/search');
+    } else if (window.history.state && window.history.state.idx > 0) {
       navigate(-1);
     } else {
-      navigate('/search');
+      navigate('/search', { replace: true });
     }
   };
 
   return (
     <>
-      <header className="bg-base-50/80 dark:bg-base-950/80 border-b border-base-200 dark:border-base-800 sticky top-0 z-40 backdrop-blur-lg transition-colors duration-300">
+      <header className={`
+        ${headerPosition} top-0 z-40 transition-all duration-300 ease-in-out
+        ${isScrolled 
+          ? 'bg-base-50/80 dark:bg-base-950/80 backdrop-blur-lg border-b border-base-200 dark:border-base-800' 
+          : 'bg-transparent border-b border-transparent'
+        }
+      `}>
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-4">
               {showBackButton && (
                 <button 
                   onClick={handleBack}
-                  className="p-2 rounded-full hover:bg-base-200 dark:hover:bg-base-800 transition-colors text-gray-600 dark:text-gray-300"
+                  className="p-2 rounded-full hover:bg-base-200/50 dark:hover:bg-base-800/50 transition-colors text-gray-600 dark:text-gray-300"
                   aria-label="Go back"
                 >
                   <ArrowLeft size={20} />
@@ -78,7 +106,7 @@ const Header: React.FC = () => {
               {showAppControls && (
                   <Link 
                     to="/bookmarks" 
-                    className="md:hidden p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition-colors"
+                    className="md:hidden p-2 rounded-full hover:bg-base-100/50 dark:hover:bg-base-800/50 transition-colors"
                     aria-label="Bookmarks"
                   >
                       <Bookmark size={20} />
@@ -88,7 +116,7 @@ const Header: React.FC = () => {
               {showAppControls && (
                 <button
                   onClick={openSettingsModal}
-                  className="p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition-colors"
+                  className="p-2 rounded-full hover:bg-base-100/50 dark:hover:bg-base-800/50 transition-colors"
                   aria-label="Open settings"
                 >
                   <Settings size={20} />
@@ -96,7 +124,7 @@ const Header: React.FC = () => {
               )}
               <button
                 onClick={toggleTheme}
-                className={`p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition-all duration-500 ease-in-out ${isAnimating ? 'rotate-[360deg]' : ''}`}
+                className={`p-2 rounded-full hover:bg-base-100/50 dark:hover:bg-base-800/50 transition-all duration-500 ease-in-out ${isAnimating ? 'rotate-[360deg]' : ''}`}
                 aria-label="Toggle theme"
               >
                 {mode === 'light' ? <Moon size={20} /> : <Sun size={20} />}

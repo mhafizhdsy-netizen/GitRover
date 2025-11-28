@@ -42,6 +42,8 @@ export interface Content {
     git: string;
     html: string;
   };
+  // FIX: Added optional 'content' property for file content API responses.
+  content?: string; // This property is present for file content requests. Base64 encoded.
 }
 
 export interface Commit {

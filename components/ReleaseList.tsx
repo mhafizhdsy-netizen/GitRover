@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { githubApi } from '../services/githubApi';
 import { Release } from '../types';
 import { Tag, Package, ChevronDown, ChevronRight, FileArchive, ArrowLeftRight, Calendar, ServerCrash, Download, Box } from 'lucide-react';
@@ -138,7 +137,14 @@ const ReleaseList: React.FC<ReleaseListProps> = ({ owner, repo }) => {
   const [hasMore, setHasMore] = useState(true);
   const [compareModal, setCompareModal] = useState<{ isOpen: boolean; base: string; head: string } | null>(null);
 
-  const fetchReleases = useCallback(() => {
+  useEffect(() => {
+    setReleases([]);
+    setPage(1);
+    setHasMore(true);
+    setError(null);
+  }, [owner, repo]);
+
+  useEffect(() => {
     setLoading(true);
     githubApi.getReleases(owner, repo, page)
       .then(response => {
@@ -151,10 +157,6 @@ const ReleaseList: React.FC<ReleaseListProps> = ({ owner, repo }) => {
       })
       .finally(() => setLoading(false));
   }, [owner, repo, page]);
-
-  useEffect(() => {
-    fetchReleases();
-  }, [fetchReleases]);
 
   const handleCompare = (base: string, head: string) => setCompareModal({ isOpen: true, base, head });
   const closeCompare = () => setCompareModal(null);

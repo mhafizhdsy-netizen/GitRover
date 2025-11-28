@@ -1,10 +1,105 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { aiService } from '../services/aiService';
+import { githubApi } from '../services/githubApi';
 import { Sparkles, Activity, BookOpen, ChevronDown, ChevronUp, Bot, FileText, HeartPulse } from 'lucide-react';
 import MarkdownRenderer from './MarkdownRenderer';
-import { Repo } from '../types';
+import { Repo, Content } from '../types';
 import CustomLoader from './common/CustomLoader';
+
+// --- New Types & Components ---
+
+interface HealthData {
+  analysis: string;
+  health_score: number;
+}
+
+const HealthGauge: React.FC<{ score: number }> = ({ score }) => {
+    const [displayScore, setDisplayScore] = useState(0);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setDisplayScore(score), 100);
+        return () => clearTimeout(timer);
+    }, [score]);
+    
+    const percentage = Math.min(Math.max(displayScore, 0), 100);
+    const radius = 50;
+    const circumference = 2 * Math.PI * radius;
+    const arcLength = circumference / 2;
+    const offset = arcLength - (percentage / 100) * arcLength;
+
+    const getColorClasses = () => {
+        if (score < 50) return { text: 'text-red-500', bg: 'bg-red-100 dark:bg-red-900/20' };
+        if (score < 80) return { text: 'text-yellow-500', bg: 'bg-yellow-100 dark:bg-yellow-900/20' };
+        return { text: 'text-green-500', bg: 'bg-green-100 dark:bg-green-900/20' };
+    };
+
+    const getLabel = () => {
+        if (score < 50) return 'Needs Improvement';
+        if (score < 80) return 'Good';
+        return 'Excellent';
+    };
+    
+    const color = getColorClasses();
+
+    return (
+        <div className="flex flex-col items-center mb-4 animate-fade-in">
+            <svg width="160" height="95" viewBox="0 0 120 75" className="-mb-2">
+                <defs>
+                    <linearGradient id="gauge-gradient-red" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#ef4444" />
+                        <stop offset="100%" stopColor="#f87171" />
+                    </linearGradient>
+                    <linearGradient id="gauge-gradient-yellow" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#f59e0b" />
+                        <stop offset="100%" stopColor="#facc15" />
+                    </linearGradient>
+                     <linearGradient id="gauge-gradient-green" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#22c55e" />
+                        <stop offset="100%" stopColor="#4ade80" />
+                    </linearGradient>
+                </defs>
+                <path
+                    d="M 10 60 A 50 50 0 0 1 110 60"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="10"
+                    className="text-base-200 dark:text-base-800"
+                    strokeLinecap="round"
+                />
+                <path
+                    d="M 10 60 A 50 50 0 0 1 110 60"
+                    fill="none"
+                    stroke={`url(#gauge-gradient-${score < 50 ? 'red' : score < 80 ? 'yellow' : 'green'})`}
+                    strokeWidth="10"
+                    strokeDasharray={arcLength}
+                    strokeDashoffset={offset}
+                    className="transition-all duration-[2000ms] ease-out"
+                    strokeLinecap="round"
+                />
+                <text
+                    x="60"
+                    y="55"
+                    textAnchor="middle"
+                    className="text-3xl font-extrabold fill-current text-gray-800 dark:text-gray-100 transition-opacity duration-500"
+                >
+                    {Math.round(percentage)}
+                </text>
+                 <text
+                    x="60"
+                    y="68"
+                    textAnchor="middle"
+                    className="text-[8px] font-bold uppercase tracking-wider fill-current text-gray-400 dark:text-gray-500"
+                >
+                    Health Score
+                </text>
+            </svg>
+             <div className={`px-3 py-1 rounded-full text-xs font-bold ${color.bg} ${color.text}`}>
+                {getLabel()}
+            </div>
+        </div>
+    );
+};
+
 
 interface AISidebarFeaturesProps {
     repo: Repo;
@@ -16,12 +111,13 @@ const FeatureCard: React.FC<{
     icon: React.ElementType;
     isOpen: boolean;
     isLoading: boolean;
-    result: string | null;
+    result: string | HealthData | null;
     error: string | null;
     onToggle: () => void;
     colorClass: string;
     buttonText: string;
-}> = ({ title, icon: Icon, isOpen, isLoading, result, error, onToggle, colorClass, buttonText }) => {
+    isHealthCard?: boolean;
+}> = ({ title, icon: Icon, isOpen, isLoading, result, error, onToggle, colorClass, buttonText, isHealthCard = false }) => {
     return (
         <div className={`
             relative overflow-hidden rounded-xl border transition-all duration-300
@@ -66,8 +162,19 @@ const FeatureCard: React.FC<{
                             <strong>Error:</strong> {error}
                         </div>
                     ) : result ? (
-                        <div className="prose-sm text-sm text-gray-600 dark:text-gray-300 animate-fade-in">
-                            <MarkdownRenderer content={result} />
+                        <div className="animate-fade-in">
+                            {isHealthCard && result && typeof result === 'object' && 'health_score' in result ? (
+                                <>
+                                    <HealthGauge score={result.health_score} />
+                                    <div className="mt-4 prose-sm text-sm text-gray-600 dark:text-gray-300">
+                                        <MarkdownRenderer content={result.analysis} />
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="prose-sm text-sm text-gray-600 dark:text-gray-300">
+                                    <MarkdownRenderer content={result as string} />
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="text-center py-2">
@@ -96,7 +203,7 @@ const AISidebarFeatures: React.FC<AISidebarFeaturesProps> = ({ repo, readmeConte
     const [isSummaryOpen, setIsSummaryOpen] = useState(false);
 
     // Health Check State
-    const [healthResult, setHealthResult] = useState<string | null>(null);
+    const [healthResult, setHealthResult] = useState<HealthData | null>(null);
     const [isHealthLoading, setIsHealthLoading] = useState(false);
     const [healthError, setHealthError] = useState<string | null>(null);
     const [isHealthOpen, setIsHealthOpen] = useState(false);
@@ -131,23 +238,69 @@ const AISidebarFeatures: React.FC<AISidebarFeaturesProps> = ({ repo, readmeConte
         }
     };
 
-    const toggleHealth = () => {
+    const toggleHealth = async () => {
         if (!isHealthOpen) {
             setIsHealthOpen(true);
-            setIsSummaryOpen(false); // Accordion behavior (optional)
+            setIsSummaryOpen(false); // Accordion behavior
 
             if (!healthResult && !isHealthLoading) {
-                 if (!readmeContent) {
-                    setHealthError("No README content available.");
-                    return;
-                }
                 setIsHealthLoading(true);
                 setHealthError(null);
 
-                aiService.checkRepoHealth(readmeContent)
-                .then(setHealthResult)
-                .catch(err => setHealthError(err.message || "Failed to check health."))
-                .finally(() => setIsHealthLoading(false));
+                try {
+                    // 1. Fetch the entire file tree
+                    const treeRes = await githubApi.getTree(repo.owner.login, repo.name, repo.default_branch || 'main', true);
+                    const allFilePaths = treeRes.data.tree.map(file => file.path).filter(path => path !== undefined) as string[];
+
+                    // 2. Identify and fetch content for key files
+                    const KEY_FILES = ['readme.md', 'contributing.md', 'package.json', 'license', 'dockerfile', 'makefile'];
+                    const keyFilePromises = allFilePaths
+                        .filter(path => KEY_FILES.some(keyFile => path.toLowerCase().includes(keyFile)))
+                        .slice(0, 5) // Limit to 5 key files to avoid excessive API calls
+                        .map(async path => {
+                            try {
+                                const contentRes = await githubApi.getContents(repo.owner.login, repo.name, path, repo.default_branch);
+                                // FIX: The API response can be a directory listing (array) or a single file.
+                                // Added a check to ensure we only process single file responses. This resolves the type error.
+                                if (contentRes.data && !Array.isArray(contentRes.data)) {
+                                    const fileData = contentRes.data as Content;
+                                    if (fileData.content) {
+                                        return { path, content: atob(fileData.content) };
+                                    }
+                                }
+                                return null;
+                            } catch {
+                                return null;
+                            }
+                        });
+                    
+                    const settledKeyFiles = await Promise.allSettled(keyFilePromises);
+                    const keyFiles = settledKeyFiles
+                        .filter(result => result.status === 'fulfilled' && result.value)
+                        .map(result => (result as PromiseFulfilledResult<any>).value);
+
+                    // 3. Call AI service and parse response
+                    const resultString = await aiService.checkRepoHealth({
+                        filePaths: allFilePaths,
+                        keyFiles: keyFiles
+                    });
+                    
+                    try {
+                        const parsedResult = JSON.parse(resultString);
+                        if (parsedResult && typeof parsedResult.analysis === 'string' && typeof parsedResult.health_score === 'number') {
+                            setHealthResult(parsedResult);
+                        } else {
+                            throw new Error("Invalid AI response format.");
+                        }
+                    } catch (parseError) {
+                        setHealthError("Failed to parse AI response. The model may have returned an unexpected format.");
+                    }
+
+                } catch (err: any) {
+                    setHealthError(err.message || "Failed to analyze repository health.");
+                } finally {
+                    setIsHealthLoading(false);
+                }
             }
         } else {
             setIsHealthOpen(false);
@@ -186,6 +339,7 @@ const AISidebarFeatures: React.FC<AISidebarFeaturesProps> = ({ repo, readmeConte
                     onToggle={toggleHealth}
                     colorClass="bg-gradient-to-br from-emerald-500 to-teal-600"
                     buttonText="Analyze Health"
+                    isHealthCard={true}
                 />
             </div>
         </div>

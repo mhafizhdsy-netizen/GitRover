@@ -257,34 +257,34 @@ export default function RepoDetailPage() {
         
         <div className="lg:flex lg:space-x-8 mt-6 lg:mt-10">
           <main className="lg:w-[calc(100%-22rem)] flex-1 min-w-0">
-            <div className="flex justify-between items-center border-b border-base-200 dark:border-base-800 mb-6">
-              <nav className="flex space-x-2 overflow-x-auto pb-0.5 scrollbar-hide" aria-label="Tabs">
-                {TABS.map((tab) => (
-                  <button
-                    key={tab.name}
-                    onClick={() => setActiveTab(tab.name)}
-                    className={`flex items-center whitespace-nowrap py-2.5 px-4 font-medium text-sm rounded-t-lg transition-all duration-300 ease-in-out relative overflow-hidden
-                      ${activeTab === tab.name
-                        ? 'bg-base-100 dark:bg-base-900 text-primary border-b-2 border-primary'
-                        : 'text-gray-500 hover:text-gray-800 dark:text-base-400 dark:hover:text-white hover:bg-base-50 dark:hover:bg-base-800 border-b-2 border-transparent'
-                      }`}
-                  >
-                    <tab.icon size={16} className="mr-2" />
-                    {tab.name}
-                  </button>
-                ))}
-              </nav>
-              <div className="lg:hidden pb-2 pl-4">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto scrollbar-hide border-b border-base-200 dark:border-base-800 flex-1 min-w-0">
+                  {TABS.map((tab) => (
+                      <button
+                          key={tab.name}
+                          onClick={() => setActiveTab(tab.name)}
+                          className={`flex items-center gap-2 px-3 py-3 whitespace-nowrap text-sm font-semibold transition-colors duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-base-950 focus-visible:ring-primary border-b-2 -mb-px ${
+                              activeTab === tab.name
+                              ? 'text-primary border-primary'
+                              : 'text-gray-500 hover:text-gray-800 dark:text-base-400 dark:hover:text-white border-transparent hover:border-gray-300 dark:hover:border-gray-600'
+                          }`}
+                      >
+                          <tab.icon size={15} className="flex-shrink-0" />
+                          <span>{tab.name}</span>
+                      </button>
+                  ))}
+              </div>
+              <div className="lg:hidden pl-4">
                 <button
-                  onClick={() => setIsSidebarOpen(true)}
-                  className="p-2 rounded-lg text-gray-500 dark:text-base-400 hover:bg-base-100 dark:hover:bg-base-800"
-                  aria-label="Show repository details"
+                    onClick={() => setIsSidebarOpen(true)}
+                    className="p-2 rounded-lg text-gray-500 dark:text-base-400 hover:bg-base-100 dark:hover:bg-base-800"
+                    aria-label="Show repository details"
                 >
-                  <PanelRightOpen size={20} />
+                    <PanelRightOpen size={20} />
                 </button>
               </div>
             </div>
-            <div key={activeTab} className="animate-fade-in">
+            <div key={activeTab} className="animate-fade-in mt-6">
               {renderTabContent()}
             </div>
           </main>

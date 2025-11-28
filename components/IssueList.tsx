@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
 import { Issue } from '../types';
@@ -18,8 +17,15 @@ const IssueList: React.FC<IssueListProps> = ({ owner, repo }) => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    setIssues([]);
+    setPage(1);
+    setHasMore(true);
+    setError(null);
+  }, [owner, repo]);
   
-  const fetchIssues = useCallback(() => {
+  useEffect(() => {
     setLoading(true);
     githubApi.getIssues(owner, repo, page)
       .then(response => {
@@ -33,10 +39,6 @@ const IssueList: React.FC<IssueListProps> = ({ owner, repo }) => {
       })
       .finally(() => setLoading(false));
   }, [owner, repo, page]);
-
-  useEffect(() => {
-    fetchIssues();
-  }, [fetchIssues]);
 
   if (error) {
     return <div className="text-center py-10 text-red-500 flex flex-col items-center"><ServerCrash size={48} className="mb-4" /><p>{error}</p></div>;

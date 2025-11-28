@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
 import { Commit } from '../types';
@@ -19,7 +18,14 @@ const CommitList: React.FC<CommitListProps> = ({ owner, repo }) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const fetchCommits = useCallback(() => {
+  useEffect(() => {
+    setCommits([]);
+    setPage(1);
+    setHasMore(true);
+    setError(null);
+  }, [owner, repo]);
+
+  useEffect(() => {
     setLoading(true);
     githubApi.getCommits(owner, repo, page)
       .then(response => {
@@ -33,17 +39,6 @@ const CommitList: React.FC<CommitListProps> = ({ owner, repo }) => {
       })
       .finally(() => setLoading(false));
   }, [owner, repo, page]);
-
-  useEffect(() => {
-    setCommits([]);
-    setPage(1);
-    setHasMore(true);
-    fetchCommits();
-  }, [owner, repo]);
-  
-  useEffect(() => {
-    if(page > 1) fetchCommits();
-  }, [page]);
 
   if (error) {
     return <div className="text-center py-10 text-red-500 flex flex-col items-center"><ServerCrash size={48} className="mb-4" /><p>{error}</p></div>;

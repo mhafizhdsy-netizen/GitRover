@@ -190,15 +190,15 @@ export const themes: Record<string, AppTheme> = {
       primary: '136 192 208', // #88C0D0 (Frost Cyan)
       secondary: '129 161 193', // #81A1C1 (Frost Blue)
       base: {
-        // Polar Night Palette for Dark Mode
-        '50': '59 66 82',   // #3B4252 (Lightest Dark)
-        '100': '54 61 77',  // Custom
-        '200': '46 52 64',  // #2E3440
-        '300': '41 46 57',  // Custom
-        '700': '216 222 233', // #D8DEE9 (Text/Elements)
-        '800': '46 52 64',    // #2E3440 (Cards)
-        '900': '36 41 51',    // Darker than #2E3440 for Main BG
-        '950': '28 32 41'     // Deepest
+        // Polar Night & Snow Storm Palette for Dark Mode (Corrected)
+        '50':  '236 239 244', // nord6 - Brightest Text
+        '100': '229 233 240', // nord5 - Main Text
+        '200': '216 222 233', // nord4 - Sub-text
+        '300': '216 222 233', // nord4 - Also sub-text for high contrast
+        '700': '76 86 106',   // nord3 - Borders / UI elements
+        '800': '67 76 94',    // nord2 - Lighter BG / Hover
+        '900': '59 66 82',    // nord1 - Main BG
+        '950': '46 52 64'     // nord0 - Deepest BG
       },
     }
   },

@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { githubApi } from '../services/githubApi';
 import { Deployment, DeploymentStatus } from '../types';
 import { Rocket, CheckCircle2, XCircle, AlertCircle, Clock, Globe, ServerCrash, GitCommit } from 'lucide-react';
@@ -121,7 +120,14 @@ const DeploymentList: React.FC<DeploymentListProps> = ({ owner, repo }) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const fetchDeployments = useCallback(() => {
+  useEffect(() => {
+    setDeployments([]);
+    setPage(1);
+    setHasMore(true);
+    setError(null);
+  }, [owner, repo]);
+
+  useEffect(() => {
     setLoading(true);
     githubApi.getDeployments(owner, repo, page)
       .then(response => {
@@ -139,10 +145,6 @@ const DeploymentList: React.FC<DeploymentListProps> = ({ owner, repo }) => {
       })
       .finally(() => setLoading(false));
   }, [owner, repo, page]);
-
-  useEffect(() => {
-    fetchDeployments();
-  }, [fetchDeployments]);
 
   if (error) {
     return <div className="text-center py-10 text-red-500 flex flex-col items-center"><ServerCrash size={48} className="mb-4" /><p>{error}</p></div>;
