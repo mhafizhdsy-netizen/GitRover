@@ -21,6 +21,7 @@ export interface Repo {
   default_branch?: string;
   homepage?: string;
   clone_url?: string;
+  ssh_url?: string;
   html_url: string;
 }
 
