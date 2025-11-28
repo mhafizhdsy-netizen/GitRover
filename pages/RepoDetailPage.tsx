@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
@@ -200,7 +199,7 @@ export default function RepoDetailPage() {
     switch (activeTab) {
       case 'Code':
         return (
-          <div className="animate-fade-in">
+          <div>
             <FileExplorer owner={owner!} name={name!} path={currentPath} branch={branch} branches={branches} />
             {readmeContent && readmePath && !currentPath && (
               <div className="mt-8 border border-base-200 dark:border-base-800 rounded-xl">
@@ -275,7 +274,9 @@ export default function RepoDetailPage() {
                 </button>
               </div>
             </div>
-            {renderTabContent()}
+            <div key={activeTab} className="animate-fade-in">
+              {renderTabContent()}
+            </div>
           </main>
           <aside className="hidden lg:block lg:w-80">
             <div className="sticky top-24">

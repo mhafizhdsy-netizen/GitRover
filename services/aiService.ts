@@ -1,4 +1,5 @@
 
+
 import { GoogleGenAI } from "@google/genai";
 
 // Initialize the GoogleGenAI client with the API key from process.env.
@@ -6,15 +7,21 @@ import { GoogleGenAI } from "@google/genai";
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 /**
- * Runs a given prompt against the Gemini API.
+ * Runs a given prompt against the Gemini API using the Thinking model.
  * @param {string} prompt The prompt to send to the AI.
  * @returns {Promise<string>} The AI's response or an error message.
  */
 async function runPrompt(prompt: string): Promise<string> {
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3-pro-preview',
             contents: prompt,
+            config: {
+                thinkingConfig: {
+                    thinkingBudget: 32768, 
+                },
+                // Explicitly NOT setting maxOutputTokens as per instructions to avoid conflict with thinking budget
+            }
         });
         return response.text ?? "The AI returned an empty response.";
     } catch (error: any) {
@@ -29,6 +36,13 @@ export interface RepoSummaryContext {
     topics: string[];
     primaryLanguage: string;
     readme: string | null;
+}
+
+export interface PRContext {
+    title: string;
+    body: string;
+    user: string;
+    files: {filename: string, status: string, additions: number, deletions: number}[];
 }
 
 export const aiService = {
@@ -86,4 +100,30 @@ export const aiService = {
         `;
         return runPrompt(prompt);
     },
+
+    reviewPullRequest: (context: PRContext): Promise<string> => {
+        const fileList = context.files.map(f => `- ${f.filename} (${f.status}: +${f.additions}, -${f.deletions})`).join('\n');
+        
+        const prompt = `
+            You are a Senior Software Engineer conducting a Pull Request review.
+            
+            Review the following Pull Request based on its description and the list of modified files.
+            
+            **PR Title:** ${context.title}
+            **Author:** ${context.user}
+            **Description:**
+            ${context.body || 'No description provided.'}
+            
+            **Changed Files:**
+            ${fileList}
+            
+            **Instructions:**
+            1. **Analyze Intent:** Based on the title and description, does the PR have a clear goal?
+            2. **Impact Assessment:** Based on the file list (size of changes, types of files), assess the risk and complexity.
+            3. **Recommendations:** Provide 3-4 bullet points on what a reviewer should look for specifically (e.g., "Check for breaking changes in API", "Ensure CSS is scoped").
+            
+            Keep the tone professional and constructive.
+        `;
+        return runPrompt(prompt);
+    }
 };

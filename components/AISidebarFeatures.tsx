@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { aiService } from '../services/aiService';
-import { Sparkles, Activity, BookOpen, ChevronRight, ChevronDown, AlertTriangle } from 'lucide-react';
+import { Sparkles, Activity, BookOpen, ChevronDown, ChevronUp, Bot, FileText, HeartPulse } from 'lucide-react';
 import MarkdownRenderer from './MarkdownRenderer';
 import { Repo } from '../types';
 import CustomLoader from './common/CustomLoader';
@@ -11,36 +11,107 @@ interface AISidebarFeaturesProps {
     readmeContent: string | null;
 }
 
-const SummarySkeleton: React.FC = () => (
-    <div className="space-y-2 animate-pulse mt-3">
-        <div className="h-3.5 bg-base-200 dark:bg-base-800 rounded-lg w-full"></div>
-        <div className="h-3.5 bg-base-200 dark:bg-base-800 rounded-lg w-full"></div>
-        <div className="h-3.5 bg-base-200 dark:bg-base-800 rounded-lg w-5/6"></div>
-    </div>
-);
+const FeatureCard: React.FC<{
+    title: string;
+    icon: React.ElementType;
+    isOpen: boolean;
+    isLoading: boolean;
+    result: string | null;
+    error: string | null;
+    onToggle: () => void;
+    colorClass: string;
+    buttonText: string;
+}> = ({ title, icon: Icon, isOpen, isLoading, result, error, onToggle, colorClass, buttonText }) => {
+    return (
+        <div className={`
+            relative overflow-hidden rounded-xl border transition-all duration-300
+            ${isOpen 
+                ? 'bg-white dark:bg-base-900 border-primary/30 shadow-lg ring-1 ring-primary/20' 
+                : 'bg-white/50 dark:bg-base-900/50 border-base-200 dark:border-base-800 hover:border-primary/30 hover:shadow-md'
+            }
+        `}>
+            {/* Header / Trigger */}
+            <button
+                onClick={onToggle}
+                className="w-full flex items-center justify-between p-3.5 text-left transition-colors focus:outline-none"
+            >
+                <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${colorClass} text-white shadow-sm`}>
+                        <Icon size={18} />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-sm text-gray-800 dark:text-gray-100">{title}</h4>
+                        <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 block -mt-0.5">
+                            Powered by Gemini 3.0
+                        </span>
+                    </div>
+                </div>
+                <div className={`text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+                    <ChevronDown size={18} />
+                </div>
+            </button>
+
+            {/* Content Area */}
+            <div className={`transition-all duration-500 ease-in-out overflow-hidden ${isOpen ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="p-4 pt-0">
+                    <div className="w-full h-px bg-gradient-to-r from-transparent via-base-200 dark:via-base-700 to-transparent mb-4"></div>
+                    
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center py-6 text-center space-y-3">
+                            <CustomLoader size={32} />
+                            <p className="text-xs font-medium text-primary animate-pulse">Thinking deeply...</p>
+                        </div>
+                    ) : error ? (
+                        <div className="p-3 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-lg text-xs text-red-600 dark:text-red-400">
+                            <strong>Error:</strong> {error}
+                        </div>
+                    ) : result ? (
+                        <div className="prose-sm text-sm text-gray-600 dark:text-gray-300 animate-fade-in">
+                            <MarkdownRenderer content={result} />
+                        </div>
+                    ) : (
+                        <div className="text-center py-2">
+                             <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                Generate an AI-powered analysis for this repository.
+                             </p>
+                             <button 
+                                onClick={(e) => { e.stopPropagation(); onToggle(); }}
+                                className="w-full py-2 bg-base-100 dark:bg-base-800 hover:bg-base-200 dark:hover:bg-base-700 text-primary font-semibold text-xs rounded-lg transition-colors border border-base-200 dark:border-base-700"
+                            >
+                                {buttonText}
+                             </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const AISidebarFeatures: React.FC<AISidebarFeaturesProps> = ({ repo, readmeContent }) => {
+    // Summary State
     const [summary, setSummary] = useState<string | null>(null);
     const [isSummaryLoading, setIsSummaryLoading] = useState(false);
     const [summaryError, setSummaryError] = useState<string | null>(null);
     const [isSummaryOpen, setIsSummaryOpen] = useState(false);
 
-    const [healthCheckResult, setHealthCheckResult] = useState<string | null>(null);
-    const [isHealthCheckLoading, setIsHealthCheckLoading] = useState(false);
-    const [healthCheckError, setHealthCheckError] = useState<string | null>(null);
+    // Health Check State
+    const [healthResult, setHealthResult] = useState<string | null>(null);
+    const [isHealthLoading, setIsHealthLoading] = useState(false);
+    const [healthError, setHealthError] = useState<string | null>(null);
+    const [isHealthOpen, setIsHealthOpen] = useState(false);
 
-    const handleGenerateSummary = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
+    const toggleSummary = () => {
         if (!isSummaryOpen) {
             setIsSummaryOpen(true);
-            if (!readmeContent && !repo.description) {
-                setSummaryError("Not enough information (README or Description) to generate a summary.");
-                return;
-            }
-
+            setIsHealthOpen(false); // Accordion behavior (optional)
+            
+            // Fetch if not present
             if (!summary && !isSummaryLoading) {
+                if (!readmeContent && !repo.description) {
+                    setSummaryError("Not enough info to generate summary.");
+                    return;
+                }
                 setIsSummaryLoading(true);
                 setSummaryError(null);
                 
@@ -60,85 +131,62 @@ const AISidebarFeatures: React.FC<AISidebarFeaturesProps> = ({ repo, readmeConte
         }
     };
 
-    const handleHealthCheck = async (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        if (!readmeContent) {
-            setHealthCheckError("No README content available for analysis.");
-            return;
-        }
+    const toggleHealth = () => {
+        if (!isHealthOpen) {
+            setIsHealthOpen(true);
+            setIsSummaryOpen(false); // Accordion behavior (optional)
 
-        setIsHealthCheckLoading(true);
-        setHealthCheckError(null);
-        setHealthCheckResult(null);
+            if (!healthResult && !isHealthLoading) {
+                 if (!readmeContent) {
+                    setHealthError("No README content available.");
+                    return;
+                }
+                setIsHealthLoading(true);
+                setHealthError(null);
 
-        try {
-            const response = await aiService.checkRepoHealth(readmeContent);
-            setHealthCheckResult(response);
-        } catch (err: any) {
-            setHealthCheckError(err.message || "An unexpected error occurred.");
-        } finally {
-            setIsHealthCheckLoading(false);
+                aiService.checkRepoHealth(readmeContent)
+                .then(setHealthResult)
+                .catch(err => setHealthError(err.message || "Failed to check health."))
+                .finally(() => setIsHealthLoading(false));
+            }
+        } else {
+            setIsHealthOpen(false);
         }
     };
 
     return (
-        <div className="mb-6">
-            <h3 className="text-sm font-semibold mb-3 text-gray-800 dark:text-gray-100 uppercase tracking-wider flex items-center">
-                <Sparkles size={14} className="mr-2 text-secondary" />
-                AI Assistant
-            </h3>
+        <div className="mb-8">
+            <div className="flex items-center justify-between mb-4 px-1">
+                <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                    <Sparkles size={12} className="text-secondary" />
+                    AI Insights
+                </h3>
+            </div>
             
-            <div className="bg-base-100 dark:bg-base-900/50 border border-base-200 dark:border-base-800 rounded-xl overflow-hidden shadow-sm">
-                <div className="border-b border-base-200 dark:border-base-800 last:border-0">
-                    <button
-                        type="button"
-                        onClick={handleGenerateSummary}
-                        className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 dark:text-base-200 hover:bg-base-50 dark:hover:bg-base-800 transition"
-                    >
-                        <div className="flex items-center">
-                            <BookOpen size={16} className="mr-2 text-primary" />
-                            Summarize Repo
-                        </div>
-                        {isSummaryOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                    </button>
-                    
-                    {isSummaryOpen && (
-                        <div className="px-4 pb-4 bg-base-50 dark:bg-base-950/30 border-t border-base-200 dark:border-base-800">
-                            {isSummaryLoading ? (
-                                <div className="flex justify-center py-2"><CustomLoader size={24} /></div>
-                            ) : summaryError ? (
-                                <div className="flex items-start text-xs text-red-500 mt-2">
-                                     <AlertTriangle size={14} className="mr-1.5 flex-shrink-0 mt-0.5" />
-                                     <span>{summaryError}</span>
-                                </div>
-                            ) : summary ? (
-                                <div className="text-sm text-gray-600 dark:text-gray-400 mt-2 prose-sm animate-fade-in">
-                                    <MarkdownRenderer content={summary} />
-                                </div>
-                            ) : null}
-                        </div>
-                    )}
-                </div>
+            <div className="space-y-3">
+                <FeatureCard 
+                    title="Smart Summary"
+                    icon={FileText}
+                    isOpen={isSummaryOpen}
+                    isLoading={isSummaryLoading}
+                    result={summary}
+                    error={summaryError}
+                    onToggle={toggleSummary}
+                    colorClass="bg-gradient-to-br from-blue-500 to-indigo-600"
+                    buttonText="Generate Summary"
+                />
 
-                <div className="p-2">
-                    <button
-                        type="button"
-                        onClick={handleHealthCheck}
-                        disabled={isHealthCheckLoading}
-                        className="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-base-200 bg-base-200 dark:bg-base-800 rounded-lg hover:bg-base-300 dark:hover:bg-base-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {isHealthCheckLoading ? <CustomLoader size={16} className="mr-2" /> : <Activity size={16} className="mr-2 text-green-500" />}
-                        Check Repo Health
-                    </button>
-                    {healthCheckError && <p className="text-xs text-red-500 mt-2 px-2 text-center">{healthCheckError}</p>}
-                    {healthCheckResult && (
-                        <div className="mt-3 p-3 bg-base-50 dark:bg-base-950 rounded-lg text-sm text-gray-600 dark:text-gray-400 border border-base-200 dark:border-base-800 animate-fade-in">
-                            <MarkdownRenderer content={healthCheckResult} />
-                        </div>
-                    )}
-                </div>
+                <FeatureCard 
+                    title="Repo Health"
+                    icon={HeartPulse}
+                    isOpen={isHealthOpen}
+                    isLoading={isHealthLoading}
+                    result={healthResult}
+                    error={healthError}
+                    onToggle={toggleHealth}
+                    colorClass="bg-gradient-to-br from-emerald-500 to-teal-600"
+                    buttonText="Analyze Health"
+                />
             </div>
         </div>
     );

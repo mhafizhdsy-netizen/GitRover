@@ -2,14 +2,28 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Repo } from '../types';
-import { Star, GitFork } from 'lucide-react';
+import { Star, GitFork, Bookmark } from 'lucide-react';
 import { formatNumber } from '../utils/formatters';
+import { useBookmarks } from '../contexts/BookmarkContext';
 
 interface RepoCardProps {
   repo: Repo;
 }
 
 const RepoCard: React.FC<RepoCardProps> = ({ repo }) => {
+  const { isRepoBookmarked, addRepo, removeRepo } = useBookmarks();
+  const isBookmarked = isRepoBookmarked(repo.id);
+
+  const handleBookmark = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isBookmarked) {
+        removeRepo(repo.id);
+    } else {
+        addRepo(repo);
+    }
+  };
+
   return (
     <div className="group relative h-full flex flex-col bg-white dark:bg-base-900 rounded-2xl p-5 shadow-sm border border-base-200 dark:border-base-800 transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-xl hover:border-primary/30 dark:hover:border-primary/30 hover:shadow-primary/5 animate-fade-in">
         
@@ -19,16 +33,31 @@ const RepoCard: React.FC<RepoCardProps> = ({ repo }) => {
             aria-label={`View repository ${repo.full_name}`}
         />
 
-        <div className="flex justify-between items-start mb-2 relative z-0 pointer-events-none">
-            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 truncate pr-2 group-hover:text-primary transition-colors duration-300">
+        <div className="flex justify-between items-start mb-2 relative z-10 pointer-events-none">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 truncate pr-2 group-hover:text-primary transition-colors duration-300 flex-1">
                 {repo.name}
             </h3>
-            {repo.language && (
-                <span className="flex-shrink-0 flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-base-100 dark:bg-base-800 text-gray-600 dark:text-gray-300 border border-base-200 dark:border-base-700">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary mr-1.5 animate-pulse"></span>
-                    {repo.language}
-                </span>
-            )}
+
+            <div className="flex items-center gap-2 pointer-events-auto">
+                {repo.language && (
+                    <span className="flex-shrink-0 flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-base-100 dark:bg-base-800 text-gray-600 dark:text-gray-300 border border-base-200 dark:border-base-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary mr-1.5 animate-pulse"></span>
+                        {repo.language}
+                    </span>
+                )}
+                
+                <button
+                    onClick={handleBookmark}
+                    className={`p-1.5 rounded-full transition-all duration-200 ${
+                        isBookmarked 
+                        ? 'text-primary bg-primary/10' 
+                        : 'text-gray-400 hover:bg-base-100 dark:hover:bg-base-800 hover:text-gray-600 dark:hover:text-gray-300'
+                    }`}
+                    title={isBookmarked ? "Remove from bookmarks" : "Bookmark this repo"}
+                >
+                    <Bookmark size={16} fill={isBookmarked ? "currentColor" : "none"} />
+                </button>
+            </div>
         </div>
 
         <div className="relative z-0 pointer-events-none flex-grow flex flex-col">

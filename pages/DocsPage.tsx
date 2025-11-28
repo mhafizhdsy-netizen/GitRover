@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
-import { BookOpen, Search, Sparkles, Settings, HelpCircle, Layers, Link as LinkIcon } from 'lucide-react';
+import { BookOpen, Search, Sparkles, Settings, HelpCircle, Layers, Link as LinkIcon, KeyRound } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const mainSections = [
   { id: 'intro', title: 'Introduction', icon: BookOpen },
@@ -189,9 +191,36 @@ const DocsPage: React.FC = () => {
                     <Heading as="h2" id="settings-main">Settings & Config</Heading>
                     <Heading as="h3" id="settings-token">GitHub Token (Rate Limits)</Heading>
                     <p>GitHub restricts unauthenticated API requests to <strong>60 per hour</strong>. Add a Personal Access Token in Settings to increase the limit to <strong>5,000 requests/hour</strong>.</p>
-                    <div className="not-prose my-4 rounded-lg border-l-4 border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 p-4 text-sm text-yellow-800 dark:text-yellow-200">
-                      Your token is stored securely in your browser's local storage and never leaves your device.
+                    
+                    <div id="how-to-create-pat" className="not-prose my-6 bg-white dark:bg-base-900 border border-base-200 dark:border-base-800 rounded-xl p-6 shadow-sm">
+                        <div className="flex items-center mb-4">
+                            <div className="p-2 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-lg mr-3">
+                                <KeyRound size={24} />
+                            </div>
+                            <h4 className="text-lg font-bold text-gray-900 dark:text-white m-0">How to create a Personal Access Token</h4>
+                        </div>
+                        <ol className="list-decimal list-inside space-y-3 text-sm text-gray-600 dark:text-base-300">
+                            <li>Log in to your GitHub account.</li>
+                            <li>Go to <strong>Settings</strong> {'>'} <strong>Developer settings</strong> {'>'} <strong>Personal access tokens</strong> {'>'} <strong>Tokens (classic)</strong>.</li>
+                            <li>Click on <strong>Generate new token (classic)</strong>.</li>
+                            <li>Give your token a descriptive name (e.g., "GitRover").</li>
+                            <li>In the <strong>Select scopes</strong> section, you only need to select <code>public_repo</code> (for accessing public repositories).</li>
+                            <li>Click <strong>Generate token</strong> at the bottom of the page.</li>
+                            <li><strong>Copy the token immediately</strong>. GitHub will not show it again.</li>
+                            <li>Paste the token into the GitRover Settings menu.</li>
+                        </ol>
+                        <div className="mt-4 pt-4 border-t border-base-200 dark:border-base-800">
+                             <a 
+                                href="https://github.com/settings/tokens/new?scopes=public_repo&description=GitRover" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center text-sm font-semibold text-primary hover:underline"
+                             >
+                                Quick Link: Generate Token on GitHub <LinkIcon size={14} className="ml-1.5" />
+                             </a>
+                        </div>
                     </div>
+
                     <Heading as="h3" id="settings-themes">Syntax Themes</Heading>
                     <p>Customize your code reading experience in <strong>Settings</strong>. Choose from themes like VS Code Dark, Dracula, GitHub Light, Nord, and more.</p>
                    </>)}

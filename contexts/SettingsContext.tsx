@@ -1,7 +1,10 @@
+
 import React, { createContext, useState, useCallback, useContext, ReactNode, useMemo } from 'react';
 import { ThemeContext } from './ThemeContext';
 
 // Import Syntax Highlighting Themes
+// Note: 'monokai' in Prism is typically 'okaidia'.
+// Removing themes that may cause import errors in specific bundle versions (oceanicNext).
 import { 
   vscDarkPlus, 
   vs, 
@@ -9,21 +12,33 @@ import {
   atomDark, 
   ghcolors, 
   materialDark, 
-  solarizedlight, // Corrected from solarizedLight
+  solarizedlight, 
   nord,
-  tomorrow
+  tomorrow,
+  okaidia,
+  twilight,
+  shadesOfPurple,
+  oneDark,
+  oneLight,
+  synthwave84
 } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 export const SYNTAX_THEMES = {
-  'auto': { name: 'Auto (System Default)', style: null }, // Special case
+  'auto': { name: 'Auto (System Default)', style: null },
   'vsc-dark': { name: 'VS Code Dark', style: vscDarkPlus },
   'vs-light': { name: 'VS Code Light', style: vs },
-  'dracula': { name: 'Dracula', style: dracula },
-  'atom-dark': { name: 'Atom One Dark', style: atomDark },
   'github-light': { name: 'GitHub Light', style: ghcolors },
+  'atom-dark': { name: 'Atom One Dark', style: atomDark },
+  'dracula': { name: 'Dracula', style: dracula },
+  'monokai': { name: 'Monokai', style: okaidia },
+  'twilight': { name: 'Twilight', style: twilight },
   'material-dark': { name: 'Material Dark', style: materialDark },
-  'solarized-light': { name: 'Solarized Light', style: solarizedlight }, // Updated usage
   'nord': { name: 'Nord', style: nord },
+  'shades-purple': { name: 'Shades of Purple', style: shadesOfPurple },
+  'synthwave': { name: 'Synthwave 84', style: synthwave84 },
+  'one-dark': { name: 'One Dark', style: oneDark },
+  'one-light': { name: 'One Light', style: oneLight },
+  'solarized-light': { name: 'Solarized Light', style: solarizedlight },
   'tomorrow': { name: 'Tomorrow', style: tomorrow },
 };
 

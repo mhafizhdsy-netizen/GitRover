@@ -1,11 +1,13 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
 import { PullRequest } from '../types';
-import { GitPullRequest, GitMerge, GitPullRequestClosed, ServerCrash } from 'lucide-react';
+import { GitPullRequest, GitMerge, GitPullRequestClosed, ServerCrash, Bot } from 'lucide-react';
 import { formatRelativeTime } from '../utils/formatters';
 import CustomLoader from './common/CustomLoader';
+import AIPrReviewModal from './AIPrReviewModal';
 
 interface PullRequestListProps {
   owner: string;
@@ -18,6 +20,7 @@ const PullRequestList: React.FC<PullRequestListProps> = ({ owner, repo }) => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [selectedPr, setSelectedPr] = useState<PullRequest | null>(null);
 
   const fetchPulls = useCallback(() => {
     setLoading(true);
@@ -44,7 +47,7 @@ const PullRequestList: React.FC<PullRequestListProps> = ({ owner, repo }) => {
 
   return (
     <div className="animate-fade-in">
-      <ul className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+      <ul className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-base-900">
         {pulls.map((pr, index) => (
           <li key={pr.id} className={`p-4 flex items-start space-x-4 hover:bg-base-50 dark:hover:bg-base-800/50 transition-colors duration-300 ${index < pulls.length - 1 ? 'border-b border-gray-200 dark:border-gray-700' : ''}`}>
             {pr.state === 'open' ? (
@@ -55,13 +58,26 @@ const PullRequestList: React.FC<PullRequestListProps> = ({ owner, repo }) => {
                 <GitPullRequestClosed className="text-red-600 mt-1 flex-shrink-0" />
             )}
             <div className="flex-1 min-w-0">
-              <span className="font-medium text-gray-800 dark:text-gray-100 hover:text-primary transition-colors cursor-pointer">
-                {pr.title}
-              </span>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                #{pr.number} opened {formatRelativeTime(pr.created_at)} by{' '}
-                <Link to={`/profile/${pr.user.login}`} className="hover:underline text-blue-600 dark:text-blue-400">{pr.user.login}</Link>
-              </p>
+              <div className="flex justify-between items-start gap-4">
+                  <div>
+                    <span className="font-medium text-gray-800 dark:text-gray-100 hover:text-primary transition-colors cursor-pointer text-sm md:text-base">
+                        {pr.title}
+                    </span>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
+                        #{pr.number} opened {formatRelativeTime(pr.created_at)} by{' '}
+                        <Link to={`/profile/${pr.user.login}`} className="hover:underline text-blue-600 dark:text-blue-400">{pr.user.login}</Link>
+                    </p>
+                  </div>
+                  
+                  <button 
+                    onClick={() => setSelectedPr(pr)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-base-100 dark:bg-base-800 hover:bg-primary hover:text-white text-gray-600 dark:text-gray-300 transition-all text-xs font-semibold flex-shrink-0 shadow-sm border border-base-200 dark:border-base-700 hover:border-transparent group"
+                    title="Get AI Review"
+                  >
+                     <Bot size={14} className="text-primary group-hover:text-white" />
+                     <span className="hidden sm:inline">AI Review</span>
+                  </button>
+              </div>
             </div>
           </li>
         ))}
@@ -79,6 +95,15 @@ const PullRequestList: React.FC<PullRequestListProps> = ({ owner, repo }) => {
 
       {!loading && pulls.length === 0 && !error && (
         <div className="text-center p-8 text-gray-500">No open pull requests</div>
+      )}
+
+      {selectedPr && (
+          <AIPrReviewModal 
+            pr={selectedPr} 
+            owner={owner} 
+            repo={repo} 
+            onClose={() => setSelectedPr(null)} 
+          />
       )}
     </div>
   );

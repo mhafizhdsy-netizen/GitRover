@@ -2,9 +2,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Repo } from '../types';
-import { Star, GitFork, Eye, Scale, Download, Copy, ChevronDown, Code } from 'lucide-react';
+import { Star, GitFork, Eye, Scale, Download, Copy, ChevronDown, Code, Bookmark } from 'lucide-react';
 import { formatNumber } from '../utils/formatters';
 import { useToast } from '../contexts/ToastContext';
+import { useBookmarks } from '../contexts/BookmarkContext';
 
 interface RepoHeaderProps {
   repo: Repo;
@@ -14,6 +15,9 @@ const RepoHeader: React.FC<RepoHeaderProps> = ({ repo }) => {
   const [isCodeOpen, setIsCodeOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { addToast } = useToast();
+  
+  const { isRepoBookmarked, addRepo, removeRepo } = useBookmarks();
+  const isBookmarked = isRepoBookmarked(repo.id);
 
   const cloneUrl = repo.clone_url || `https://github.com/${repo.full_name}.git`;
   const downloadUrl = `${repo.html_url}/archive/refs/heads/${repo.default_branch || 'main'}.zip`;
@@ -33,6 +37,14 @@ const RepoHeader: React.FC<RepoHeaderProps> = ({ repo }) => {
     navigator.clipboard.writeText(cloneUrl);
     addToast('Clone URL copied to clipboard', 'success');
   };
+
+  const toggleBookmark = () => {
+    if(isBookmarked) {
+        removeRepo(repo.id);
+    } else {
+        addRepo(repo);
+    }
+  }
 
   return (
     <header className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -76,6 +88,18 @@ const RepoHeader: React.FC<RepoHeaderProps> = ({ repo }) => {
       </div>
 
       <div className="flex items-center gap-3 flex-shrink-0">
+        <button
+          onClick={toggleBookmark}
+          className={`flex items-center justify-center px-3 py-2 border rounded-lg font-semibold text-sm transition-colors shadow-sm
+            ${isBookmarked 
+                ? 'bg-primary/10 border-primary text-primary hover:bg-primary/20' 
+                : 'bg-base-100 dark:bg-base-800 border-base-300 dark:border-base-700 hover:bg-base-200 dark:hover:bg-base-700 text-gray-700 dark:text-gray-200'
+            }`}
+          title={isBookmarked ? "Remove from Bookmarks" : "Add to Bookmarks"}
+        >
+          <Bookmark size={16} fill={isBookmarked ? "currentColor" : "none"} />
+        </button>
+
         <a
           href={forkUrl}
           target="_blank"

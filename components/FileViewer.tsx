@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { githubApi } from '../services/githubApi';
 import { Content } from '../types';
 import { X, Download, File as FileIcon, Sparkles, Copy } from 'lucide-react';
@@ -27,7 +28,6 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
   const [content, setContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedText, setSelectedText] = useState('');
-  const [buttonPosition, setButtonPosition] = useState<{ top: number; left: number } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fontSize, setFontSize] = useState(14);
   const fontSizeRef = useRef(fontSize);
@@ -150,31 +150,14 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
         const selection = window.getSelection();
         if (!selection || selection.rangeCount === 0 || !contentRef.current?.contains(selection.anchorNode)) {
             setSelectedText('');
-            setButtonPosition(null);
             return;
         }
 
         const text = selection.toString().trim();
         if (text) {
             setSelectedText(text);
-            if (window.matchMedia('(min-width: 768px)').matches) {
-                try {
-                    const range = selection.getRangeAt(0);
-                    const rect = range.getBoundingClientRect();
-                    const containerRect = contentRef.current.getBoundingClientRect();
-                    setButtonPosition({
-                        top: rect.top - containerRect.top - 40,
-                        left: rect.left - containerRect.left + rect.width / 2,
-                    });
-                } catch {
-                    setButtonPosition(null);
-                }
-            } else {
-                setButtonPosition(null);
-            }
         } else {
             setSelectedText('');
-            setButtonPosition(null);
         }
     };
     document.addEventListener('selectionchange', handleSelectionChange);
@@ -269,65 +252,58 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
     );
   };
 
-  return (
-    <>
-        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4 animate-fade-in" onClick={onClose}>
-        <div 
-            className="bg-white dark:bg-base-900 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col relative" 
-            onClick={(e) => e.stopPropagation()}
-        >
-            <header className="flex items-center justify-between p-4 border-b border-base-200 dark:border-base-800">
-            <div className="flex items-center text-sm font-semibold truncate text-gray-800 dark:text-gray-100">
-                <FileIcon size={16} className="mr-2 text-gray-500" />
-                <span className="truncate">{file.path}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-                <button onClick={handleCopy} className="p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition text-gray-600 dark:text-gray-300">
-                  <Copy size={18} />
-                </button>
-                {file.download_url && (
-                <a href={file.download_url} download target="_blank" rel="noopener noreferrer" className="p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition text-gray-600 dark:text-gray-300">
-                    <Download size={18} />
-                </a>
-                )}
-                <button onClick={onClose} className="p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition text-gray-600 dark:text-gray-300">
-                    <X size={18} />
-                </button>
-            </div>
-            </header>
-            
-            <div className="p-4 overflow-auto relative flex-1 text-gray-800 dark:text-gray-200 select-none cursor-default" ref={contentRef}>
-                {renderContent()}
-                
-                {buttonPosition && selectedText && (
-                    <button
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => setIsModalOpen(true)}
-                        className="absolute flex items-center px-3 py-1.5 text-xs font-semibold text-white bg-secondary rounded-lg shadow-lg animate-fade-in hover:bg-secondary/90 transition-transform hover:scale-105 z-20"
-                        style={{ top: buttonPosition.top, left: buttonPosition.left, transform: 'translateX(-50%)' }}
-                    >
-                        <Sparkles size={14} className="mr-1.5" />
-                        AI Explain
-                    </button>
-                )}
-            </div>
+  const portalRoot = document.getElementById('portal-root');
+  if (!portalRoot) return null;
 
-            {selectedText && (
-               <div className="md:hidden absolute bottom-4 left-0 right-0 flex justify-center z-20 animate-fade-in px-4">
-                  <button
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center justify-center w-full px-4 py-3 text-sm font-bold text-white bg-gradient-to-r from-primary to-secondary rounded-full shadow-xl"
-                  >
-                    <Sparkles size={18} className="mr-2" />
-                    Explain Selection with AI
-                  </button>
-               </div>
-            )}
-        </div>
+  return createPortal(
+    <>
+        <div className="fixed inset-0 bg-black/60 z-[60] flex justify-center items-center p-4 animate-fade-in" onClick={onClose}>
+            <div 
+                className="bg-white dark:bg-base-900 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col relative" 
+                onClick={(e) => e.stopPropagation()}
+            >
+                <header className="flex items-center justify-between p-4 border-b border-base-200 dark:border-base-800">
+                <div className="flex items-center text-sm font-semibold truncate text-gray-800 dark:text-gray-100">
+                    <FileIcon size={16} className="mr-2 text-gray-500" />
+                    <span className="truncate">{file.path}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                    <button onClick={handleCopy} className="p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition text-gray-600 dark:text-gray-300">
+                    <Copy size={18} />
+                    </button>
+                    {file.download_url && (
+                    <a href={file.download_url} download target="_blank" rel="noopener noreferrer" className="p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition text-gray-600 dark:text-gray-300">
+                        <Download size={18} />
+                    </a>
+                    )}
+                    <button onClick={onClose} className="p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition text-gray-600 dark:text-gray-300">
+                        <X size={18} />
+                    </button>
+                </div>
+                </header>
+                
+                <div className="p-4 overflow-auto relative flex-1 text-gray-800 dark:text-gray-200 select-none cursor-default" ref={contentRef}>
+                    {renderContent()}
+                </div>
+
+                {/* Floating AI Action Dock - Centered at bottom of modal */}
+                {selectedText && (
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 animate-fade-in">
+                        <button
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => setIsModalOpen(true)}
+                            className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 ring-2 ring-white/20"
+                        >
+                            <Sparkles size={16} />
+                            Explain Selection
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
         {isModalOpen && <AIExplanationModal codeSnippet={selectedText} onClose={() => setIsModalOpen(false)} />}
-    </>
+    </>,
+    portalRoot
   );
 };
 

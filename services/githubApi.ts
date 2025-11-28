@@ -65,6 +65,9 @@ export const githubApi = {
   getPullRequests: (owner: string, repo: string, page = 1) =>
     API.get<PullRequest[]>(`/repos/${owner}/${repo}/pulls?page=${page}&per_page=20`),
     
+  getPullRequestFiles: (owner: string, repo: string, pullNumber: number) =>
+    API.get<{filename: string, status: string, additions: number, deletions: number}[]>(`/repos/${owner}/${repo}/pulls/${pullNumber}/files`),
+
   getBranches: (owner: string, repo: string) =>
     API.get<Branch[]>(`/repos/${owner}/${repo}/branches`),
 

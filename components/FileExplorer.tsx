@@ -263,6 +263,15 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ owner, name, path, branch, 
            </div>
         </div>
       </div>
+      
+      {/* Header Row for columns (Visible on desktop) */}
+      <div className="hidden sm:flex items-center justify-between px-4 py-2 bg-base-50 dark:bg-base-800/50 border-b border-base-200 dark:border-base-700 text-xs font-semibold text-gray-500 dark:text-gray-400">
+         <span className="flex-1">Name</span>
+         <div className="flex items-center gap-6 min-w-[200px] justify-end">
+            <span className="w-32 text-right">Last Modified</span>
+            <span className="w-16 text-right">Size</span>
+         </div>
+      </div>
 
       <div className="divide-y divide-base-200 dark:divide-base-800 bg-white dark:bg-base-900">
         {path && (
@@ -276,23 +285,32 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ owner, name, path, branch, 
         
         {processedContents.length > 0 ? (
           processedContents.map((item) => (
-            <div key={item.path} className="group flex items-center justify-between px-4 py-2.5 hover:bg-base-50 dark:hover:bg-base-800 transition-colors cursor-pointer" onClick={() => item.type === 'dir' ? navigate(`/repo/${owner}/${name}/tree/${branch}/${item.path}`) : handleFileClick(item)}>
+            <div 
+                key={item.path} 
+                className="group flex items-center justify-between px-4 py-2.5 hover:bg-base-50 dark:hover:bg-base-800 transition-colors cursor-pointer" 
+                onClick={() => item.type === 'dir' ? navigate(`/repo/${owner}/${name}/tree/${branch}/${item.path}`) : handleFileClick(item)}
+            >
               <div className="flex items-center min-w-0 flex-1 mr-4">
                 <div className="mr-3 flex-shrink-0">{getFileIcon(item.name, item.type)}</div>
-                <span className="text-sm text-gray-700 dark:text-gray-200 truncate group-hover:text-primary transition-colors">{item.name}</span>
+                <span className="text-sm text-gray-700 dark:text-gray-200 truncate group-hover:text-primary transition-colors font-medium">{item.name}</span>
               </div>
-              <div className="flex items-center space-x-4 flex-shrink-0">
-                 <div className="text-xs text-gray-400 dark:text-gray-500 flex items-center min-w-[100px] justify-end">
+              
+              <div className="flex items-center gap-6 flex-shrink-0 min-w-[200px] justify-end">
+                 {/* Timestamp Column */}
+                 <div className="text-xs text-gray-400 dark:text-gray-500 w-32 text-right">
                      {fileDates[item.path] ? (
-                         <>
-                            <span className="hidden sm:inline mr-1">{formatRelativeTime(fileDates[item.path])}</span>
-                            <span className="sm:hidden">{new Date(fileDates[item.path]).toLocaleDateString(undefined, { month:'short', day:'numeric' })}</span>
-                         </>
+                         <span className="truncate block" title={new Date(fileDates[item.path]).toLocaleString()}>
+                             {formatRelativeTime(fileDates[item.path])}
+                         </span>
                      ) : (
-                         <span className="opacity-0 group-hover:opacity-50 transition-opacity flex items-center"><Clock size={10} className="mr-1" /> ...</span>
+                         <span className="opacity-0 group-hover:opacity-50 transition-opacity flex items-center justify-end">
+                            <Clock size={10} className="mr-1" /> ...
+                         </span>
                      )}
                  </div>
-                 <div className="text-xs text-gray-400 dark:text-gray-500 font-mono w-[60px] text-right">
+
+                 {/* File Size Column */}
+                 <div className="text-xs text-gray-500 dark:text-gray-400 font-mono w-16 text-right">
                     {item.type === 'dir' ? (folderSizes[item.path] ? formatFileSize(folderSizes[item.path]) : '-') : formatFileSize(item.size)}
                  </div>
               </div>

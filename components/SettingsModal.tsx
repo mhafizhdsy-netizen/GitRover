@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, KeyRound, Check, ExternalLink, Palette, Code, ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { X, KeyRound, Check, ExternalLink, Palette, Code, ChevronDown, HelpCircle } from 'lucide-react';
 import { useSettings, SYNTAX_THEMES, SyntaxThemeKey } from '../contexts/SettingsContext';
 import { useToast } from '../contexts/ToastContext';
 import { ThemeContext, ThemeName } from '../contexts/ThemeContext';
@@ -182,14 +184,26 @@ const SettingsModal: React.FC = () => {
               <p className="text-xs text-gray-500 dark:text-base-400 mt-2">
                 Increases API rate limit from 60 to 5,000 reqs/hr.
               </p>
-              <a 
-                href="https://github.com/settings/tokens/new?scopes=public_repo&description=GitRover" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="inline-flex items-center text-sm text-primary dark:text-primary-light hover:underline mt-1"
-              >
-                Generate token <ExternalLink size={14} className="ml-1" />
-              </a>
+              
+              <div className="flex flex-col gap-2 mt-3">
+                  <a 
+                    href="https://github.com/settings/tokens/new?scopes=public_repo&description=GitRover" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="inline-flex items-center text-sm text-primary hover:underline"
+                  >
+                    Generate token on GitHub <ExternalLink size={14} className="ml-1" />
+                  </a>
+                  
+                  <Link 
+                    to="/docs#how-to-create-pat" 
+                    onClick={closeSettingsModal}
+                    className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors"
+                  >
+                    <HelpCircle size={14} className="mr-1.5" />
+                    How to create a Personal Access Token?
+                  </Link>
+              </div>
             </div>
 
             <div className="border-t border-base-200 dark:border-base-800"></div>

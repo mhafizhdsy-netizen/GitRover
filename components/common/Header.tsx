@@ -2,7 +2,7 @@
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ThemeContext } from '../../contexts/ThemeContext';
-import { Sun, Moon, Settings, ArrowLeft } from 'lucide-react';
+import { Sun, Moon, Settings, ArrowLeft, Bookmark } from 'lucide-react';
 import { GitRoverIcon } from '../../assets/icon';
 import { useSettings } from '../../contexts/SettingsContext';
 
@@ -63,10 +63,22 @@ const Header: React.FC = () => {
               <nav className="hidden md:flex ml-6 space-x-6 text-sm font-medium text-gray-600 dark:text-gray-400">
                 <Link to="/docs" className="hover:text-primary transition-colors">Docs</Link>
                 <Link to="/search" className="hover:text-primary transition-colors">Explore</Link>
+                <Link to="/bookmarks" className="hover:text-primary transition-colors flex items-center gap-1.5">
+                    <Bookmark size={14} />
+                    Bookmarks
+                </Link>
               </nav>
             </div>
             
             <div className="flex items-center space-x-2">
+              <Link 
+                to="/bookmarks" 
+                className="md:hidden p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition-colors"
+                aria-label="Bookmarks"
+              >
+                  <Bookmark size={20} />
+              </Link>
+
               {!isLandingPage && (
                 <button
                   onClick={openSettingsModal}

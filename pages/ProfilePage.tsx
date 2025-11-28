@@ -2,13 +2,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
-import { UserProfile, Repo, Gist, GistFile } from '../types';
+import { UserProfile, Repo, Gist } from '../types';
 import { Users, MapPin, Link as LinkIcon, Building, ChevronLeft, ChevronRight, Book, FileCode, LayoutGrid, X, Maximize2 } from 'lucide-react';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import RepoCard from '../components/RepoCard';
+import GistCard from '../components/GistCard';
 import ErrorDisplay from '../components/common/ErrorDisplay';
-import { formatNumber, formatRelativeTime, formatFileSize } from '../utils/formatters';
+import { formatNumber } from '../utils/formatters';
 import GistViewerModal from '../components/GistViewerModal';
 import CustomLoader from '../components/common/CustomLoader';
 
@@ -39,32 +40,6 @@ const ProfilePageSkeleton: React.FC = () => (
                     </div>
                 ))}
             </div>
-        </div>
-    </div>
-);
-
-const GistCard: React.FC<{ gist: Gist; onClick: () => void }> = ({ gist, onClick }) => (
-    <div 
-        onClick={onClick}
-        className="bg-white dark:bg-base-900 rounded-2xl p-5 shadow-sm border border-base-200 dark:border-base-800 hover:border-primary/50 dark:hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
-    >
-        <div className="flex items-start justify-between mb-2">
-            <div className="flex items-center gap-2">
-                 <FileCode size={18} className="text-gray-400 group-hover:text-primary transition-colors" />
-                 <h3 className="font-mono text-sm font-semibold text-gray-800 dark:text-gray-200 truncate group-hover:text-primary transition-colors">
-                    {Object.keys(gist.files)[0]}
-                 </h3>
-            </div>
-            <span className="text-xs text-gray-400 bg-base-100 dark:bg-base-800 px-2 py-0.5 rounded-full">
-                {Object.keys(gist.files).length} files
-            </span>
-        </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 h-10 mb-4">
-            {gist.description || "No description provided."}
-        </p>
-        <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-base-100 dark:border-base-800/50">
-             <span>{formatRelativeTime(gist.created_at)}</span>
-             <span>{formatFileSize((Object.values(gist.files) as GistFile[]).reduce((acc, f) => acc + f.size, 0))}</span>
         </div>
     </div>
 );

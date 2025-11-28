@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
@@ -9,10 +10,12 @@ import TermsPage from './pages/TermsPage';
 import AboutPage from './pages/AboutPage';
 import DocsPage from './pages/DocsPage';
 import RoadmapPage from './pages/RoadmapPage';
-import LicensePage from './pages/LicensePage'; 
+import LicensePage from './pages/LicensePage';
+import BookmarksPage from './pages/BookmarksPage';
 import { ThemeContext, ThemeMode, ThemeName } from './contexts/ThemeContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { ToastProvider } from './contexts/ToastContext';
+import { BookmarkProvider } from './contexts/BookmarkContext';
 import SettingsModal from './components/SettingsModal';
 import { ToastContainer } from './components/common/Toast';
 import BackToTop from './components/common/BackToTop';
@@ -85,27 +88,30 @@ export default function App() {
     <ThemeContext.Provider value={themeValue}>
       <ToastProvider>
         <SettingsProvider>
-          <div className="min-h-screen text-gray-800 dark:text-base-200 bg-base-50 dark:bg-base-950 font-sans flex flex-col">
-            <HashRouter>
-              <ScrollToTop /> {/* Handle Global Scroll Restoration */}
-              <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/search" element={<HomePage />} />
-                <Route path="/repo/:owner/:name/*" element={<RepoDetailPage />} />
-                <Route path="/profile/:username" element={<ProfilePage />} />
-                <Route path="/terms" element={<TermsPage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/docs" element={<DocsPage />} />
-                <Route path="/roadmap" element={<RoadmapPage />} />
-                <Route path="/license" element={<LicensePage />} /> 
-                <Route path="*" element={<ErrorPage />} />
-              </Routes>
-              <SettingsModal />
-              <ToastContainer />
-              <BackToTop />
-              <CookieConsent />
-            </HashRouter>
-          </div>
+          <BookmarkProvider>
+            <div className="min-h-screen text-gray-800 dark:text-base-200 bg-base-50 dark:bg-base-950 font-sans flex flex-col">
+              <HashRouter>
+                <ScrollToTop /> {/* Handle Global Scroll Restoration */}
+                <Routes>
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/search" element={<HomePage />} />
+                  <Route path="/repo/:owner/:name/*" element={<RepoDetailPage />} />
+                  <Route path="/profile/:username" element={<ProfilePage />} />
+                  <Route path="/terms" element={<TermsPage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/docs" element={<DocsPage />} />
+                  <Route path="/roadmap" element={<RoadmapPage />} />
+                  <Route path="/license" element={<LicensePage />} />
+                  <Route path="/bookmarks" element={<BookmarksPage />} />
+                  <Route path="*" element={<ErrorPage />} />
+                </Routes>
+                <SettingsModal />
+                <ToastContainer />
+                <BackToTop />
+                <CookieConsent />
+              </HashRouter>
+            </div>
+          </BookmarkProvider>
         </SettingsProvider>
       </ToastProvider>
     </ThemeContext.Provider>
