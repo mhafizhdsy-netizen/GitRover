@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
@@ -30,27 +29,32 @@ const SkeletonCard: React.FC = () => (
 export default function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   
-  const initialQuery = searchParams.get('q') || 'react';
-  const initialPage = parseInt(searchParams.get('page') || '1', 10);
-  const initialSort = searchParams.get('sort') || 'best-match';
+  // URL is the single source of truth. Derive state from it on each render.
+  const searchTerm = searchParams.get('q') || 'react';
+  const page = parseInt(searchParams.get('page') || '1', 10);
+  const sort = searchParams.get('sort') || 'best-match';
+
+  // Only `query` needs local state for the controlled input field.
+  const [query, setQuery] = useState(searchTerm);
   
-  const [query, setQuery] = useState(initialQuery);
-  const [searchTerm, setSearchTerm] = useState(initialQuery);
   const [repos, setRepos] = useState<Repo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
-  
-  const [page, setPage] = useState(initialPage);
-  const [sort, setSort] = useState(initialSort);
   const [totalPages, setTotalPages] = useState(0);
 
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
 
+  // Sync the input field if the URL's query changes (e.g. browser back/forward).
+  useEffect(() => {
+    setQuery(searchTerm);
+  }, [searchTerm]);
+
   const fetchRepos = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
+      // Fetch using values directly derived from the URL.
       const { data } = await githubApi.searchRepositories(searchTerm, sort, 'desc', page);
       setRepos(data.items);
       setTotalPages(Math.min(Math.ceil(data.total_count / 12), 84));
@@ -66,6 +70,11 @@ export default function HomePage() {
     fetchRepos();
   }, [fetchRepos]);
 
+  // Scroll to top when filters or page change for a better user experience.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [page, sort, searchTerm]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
         if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
@@ -79,20 +88,16 @@ export default function HomePage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-        setPage(1);
-        setSearchTerm(query);
+        // Handlers now only need to update the URL. Component will react to this change.
         setSearchParams({ q: query, page: '1', sort: sort });
     }
   };
 
   const handlePageChange = (newPage: number) => {
-      setPage(newPage);
       setSearchParams({ q: searchTerm, page: newPage.toString(), sort: sort });
   };
 
   const handleSortSelect = (newSort: string) => {
-      setSort(newSort);
-      setPage(1); 
       setSearchParams({ q: searchTerm, page: '1', sort: newSort });
       setIsSortOpen(false);
   };
