@@ -81,7 +81,7 @@ const FeatureCard: React.FC<{ icon: React.ElementType, title: string, desc: stri
 );
 
 const TestimonialCard: React.FC<{ name: string, role: string, text: string, avatar: string }> = ({ name, role, text, avatar }) => (
-  <div className="bg-white dark:bg-base-900/80 p-6 rounded-2xl relative h-full w-96 flex-shrink-0 border border-base-200 dark:border-base-800 shadow-sm backdrop-blur-md">
+  <div className="bg-white dark:bg-base-900/80 p-5 rounded-2xl relative h-full w-80 flex-shrink-0 border border-base-200 dark:border-base-800 shadow-sm backdrop-blur-md">
     <div className="flex items-center mb-4">
       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary overflow-hidden mr-3">
         <img src={avatar} alt={name} className="w-full h-full object-cover" />
@@ -114,6 +114,12 @@ const testimonials = [
     { name: "Nia Adebayo", role: "Mobile Developer", text: "The mobile-first design isn't just a buzzword here; it actually works beautifully on my phone for quick code checks on the go.", avatar: "https://images.unsplash.com/photo-1492681290082-e932832941e6?auto=format&fit=crop&w=100&q=80" },
     { name: "Ryan Patel", role: "Backend Engineer", text: "The minimalist interface helps me focus on what matters: the code. No distractions, just pure performance and utility.", avatar: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=100&q=80" },
     { name: "Olivia Wilde", role: "Frontend Engineer", text: "The code folding and syntax theme options make reading large files so much more pleasant. It's the little details that make GitRover great.", avatar: "https://images.unsplash.com/photo-1589156280159-27698a70f29e?auto=format&fit=crop&w=100&q=80" },
+    { name: "Daniel Smith", role: "Cloud Architect", text: "This tool is perfect for reviewing infrastructure-as-code repos. The AI can even explain complex Terraform configurations.", avatar: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=100&q=80" },
+    { name: "Maria Garcia", role: "QA Engineer", text: "GitRover's clear commit history and file diffs make it easy to trace changes and verify bug fixes. A huge help for my workflow.", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" },
+    { name: "James Brown", role: "Technical Writer", text: "The repo summary is a game-changer for writing documentation. It gives me a perfect starting point, saving tons of time.", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" },
+    { name: "Linda Williams", role: "Project Manager", text: "I'm not a developer, but GitRover's AI summaries help me understand what my team is working on at a high level. Incredibly useful!", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80" },
+    { name: "Robert Johnson", role: "Security Researcher", text: "The ability to quickly browse file structures and read code without cloning is invaluable for security audits. A very efficient tool.", avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80" },
+    { name: "Patricia Jones", role: "Professor of CS", text: "I recommend GitRover to all my students. It simplifies the often-intimidating GitHub interface and helps them learn by exploring real-world code.", avatar: "https://images.unsplash.com/photo-1520466207246-5925c04dba56?auto=format&fit=crop&w=100&q=80" },
 ];
 
 export default function LandingPage() {
@@ -139,9 +145,9 @@ export default function LandingPage() {
     '--aurora': `repeating-linear-gradient(100deg, rgb(var(--color-primary)) 10%, rgb(var(--color-secondary)) 25%, rgb(var(--color-primary)) 40%)`
   } as React.CSSProperties;
 
-  const firstRow = testimonials.slice(0, 5);
-  const secondRow = testimonials.slice(5, 10);
-  const thirdRow = testimonials.slice(10, 15);
+  const firstRow = testimonials.slice(0, 7);
+  const secondRow = testimonials.slice(7, 14);
+  const thirdRow = testimonials.slice(14, 21);
 
   return (
     <div className="min-h-screen flex flex-col bg-base-50 dark:bg-base-950 overflow-x-hidden">

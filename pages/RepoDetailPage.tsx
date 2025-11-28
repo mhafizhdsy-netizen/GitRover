@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
@@ -257,19 +256,19 @@ export default function RepoDetailPage() {
         
         <div className="lg:flex lg:space-x-8 mt-6 lg:mt-10">
           <main className="lg:w-[calc(100%-22rem)] flex-1 min-w-0">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto scrollbar-hide border-b border-base-200 dark:border-base-800 flex-1 min-w-0">
+            <div className="flex justify-between items-center border-b border-base-200 dark:border-base-800">
+              <div className="flex items-center gap-1 p-1 overflow-x-auto scrollbar-hide flex-1 min-w-0">
                   {TABS.map((tab) => (
                       <button
                           key={tab.name}
                           onClick={() => setActiveTab(tab.name)}
-                          className={`flex items-center gap-2 px-3 py-3 whitespace-nowrap text-sm font-semibold transition-colors duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-base-950 focus-visible:ring-primary border-b-2 -mb-px ${
+                          className={`flex items-center gap-2 px-4 py-2 whitespace-nowrap text-sm rounded-lg transition-colors duration-200 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-base-950 focus-visible:ring-primary ${
                               activeTab === tab.name
-                              ? 'text-primary border-primary'
-                              : 'text-gray-500 hover:text-gray-800 dark:text-base-400 dark:hover:text-white border-transparent hover:border-gray-300 dark:hover:border-gray-600'
+                              ? 'bg-base-100 dark:bg-base-800 text-primary font-semibold'
+                              : 'text-gray-500 hover:text-gray-800 dark:text-base-400 dark:hover:text-white hover:bg-base-100/50 dark:hover:bg-base-800/50 font-medium'
                           }`}
                       >
-                          <tab.icon size={15} className="flex-shrink-0" />
+                          <tab.icon size={16} className="flex-shrink-0" />
                           <span>{tab.name}</span>
                       </button>
                   ))}
