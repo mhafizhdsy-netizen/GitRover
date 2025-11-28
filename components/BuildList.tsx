@@ -2,8 +2,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { githubApi } from '../services/githubApi';
 import { WorkflowRun } from '../types';
-import { Loader2, PlayCircle, CheckCircle2, XCircle, AlertCircle, GitBranch, ServerCrash, Clock, User } from 'lucide-react';
+import { PlayCircle, CheckCircle2, XCircle, AlertCircle, GitBranch, ServerCrash, Clock } from 'lucide-react';
 import { formatRelativeTime } from '../utils/formatters';
+import CustomLoader from './common/CustomLoader';
 
 interface BuildListProps {
   owner: string;
@@ -13,7 +14,7 @@ interface BuildListProps {
 const BuildItem: React.FC<{ run: WorkflowRun; isLast: boolean }> = ({ run, isLast }) => {
     const getStatusIcon = () => {
         if (run.status === 'queued' || run.status === 'in_progress') {
-            return <Loader2 size={18} className="text-yellow-500 animate-spin bg-white dark:bg-base-900 rounded-full" />;
+            return <div className="w-[18px] h-[18px] rounded-full border-2 border-yellow-500 border-t-transparent animate-spin bg-white dark:bg-base-900"></div>;
         }
         switch (run.conclusion) {
             case 'success': return <CheckCircle2 size={18} className="text-green-500 bg-white dark:bg-base-900 rounded-full" />;
@@ -25,9 +26,9 @@ const BuildItem: React.FC<{ run: WorkflowRun; isLast: boolean }> = ({ run, isLas
     };
 
     return (
-        <div className="flex gap-4 group hover:bg-base-50 dark:hover:bg-base-800/50 p-3 rounded-lg transition-colors -mx-2">
+        <div className="flex gap-4 group hover:bg-base-50 dark:hover:bg-base-800/50 p-3 rounded-lg transition-all duration-300 -mx-2">
             <div className="flex flex-col items-center flex-shrink-0 w-8 pt-1">
-                <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-base-100 dark:bg-base-800 border border-base-200 dark:border-base-700 text-gray-500">
+                <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-base-100 dark:bg-base-800 border border-base-200 dark:border-base-700 text-gray-500 transition-transform duration-300 group-hover:scale-110">
                     <PlayCircle size={16} />
                     <div className="absolute -bottom-1 -right-1">
                         {getStatusIcon()}
@@ -40,7 +41,6 @@ const BuildItem: React.FC<{ run: WorkflowRun; isLast: boolean }> = ({ run, isLas
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
                     <div className="flex-1 min-w-0">
                          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                             {/* Title Container - allows marquee on hover */}
                              <a 
                                 href={run.html_url}
                                 target="_blank"
@@ -141,7 +141,7 @@ const BuildList: React.FC<BuildListProps> = ({ owner, repo }) => {
         ))}
        </div>
 
-      {loading && <div className="flex justify-center py-8"><Loader2 className="animate-spin text-primary" size={32} /></div>}
+      {loading && <div className="flex justify-center py-8"><CustomLoader size={48} /></div>}
 
       {hasMore && !loading && runs.length > 0 && (
         <div className="text-center pt-6 pb-2">

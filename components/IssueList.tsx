@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
 import { Issue } from '../types';
-import { Loader2, AlertCircle, CircleDot, ServerCrash } from 'lucide-react';
+import { AlertCircle, CircleDot, ServerCrash } from 'lucide-react';
 import { formatRelativeTime } from '../utils/formatters';
+import CustomLoader from './common/CustomLoader';
 
 interface IssueListProps {
   owner: string;
@@ -41,22 +43,22 @@ const IssueList: React.FC<IssueListProps> = ({ owner, repo }) => {
   }
 
   return (
-    <div>
-      <ul className="border border-gray-200 dark:border-gray-700 rounded-lg">
+    <div className="animate-fade-in">
+      <ul className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
         {issues.map((issue, index) => (
-          <li key={issue.id} className={`p-4 flex items-start space-x-4 ${index < issues.length - 1 ? 'border-b border-gray-200 dark:border-gray-700' : ''}`}>
+          <li key={issue.id} className={`p-4 flex items-start space-x-4 hover:bg-base-50 dark:hover:bg-base-800/50 transition-colors duration-300 ${index < issues.length - 1 ? 'border-b border-gray-200 dark:border-gray-700' : ''}`}>
             {issue.state === 'open' ? (
                 <AlertCircle className="text-green-600 mt-1 flex-shrink-0" />
             ) : (
                 <CircleDot className="text-purple-600 mt-1 flex-shrink-0" />
             )}
             <div className="flex-1 min-w-0">
-              <span className="font-medium text-gray-800 dark:text-gray-100">
+              <span className="font-medium text-gray-800 dark:text-gray-100 hover:text-primary transition-colors cursor-pointer">
                 {issue.title}
               </span>
               <div className="flex flex-wrap gap-1 mt-2">
                 {issue.labels.map(label => (
-                    <span key={label.name} className="px-2 py-0.5 text-xs rounded-full font-medium" style={{ backgroundColor: `#${label.color}20`, color: `#${label.color}` }}>
+                    <span key={label.name} className="px-2 py-0.5 text-xs rounded-full font-medium border border-transparent hover:border-current transition-colors" style={{ backgroundColor: `#${label.color}20`, color: `#${label.color}` }}>
                         {label.name}
                     </span>
                 ))}
@@ -70,7 +72,7 @@ const IssueList: React.FC<IssueListProps> = ({ owner, repo }) => {
         ))}
       </ul>
       
-      {loading && <div className="flex justify-center py-4"><Loader2 className="animate-spin" /></div>}
+      {loading && <div className="flex justify-center py-8"><CustomLoader size={48} /></div>}
       
       {hasMore && !loading && issues.length > 0 && (
         <div className="text-center mt-4">

@@ -2,8 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Repo } from '../types';
-import { Star, GitFork, Clock } from 'lucide-react';
-import { formatNumber, formatRelativeTime } from '../utils/formatters';
+import { Star, GitFork } from 'lucide-react';
+import { formatNumber } from '../utils/formatters';
 
 interface RepoCardProps {
   repo: Repo;
@@ -11,29 +11,26 @@ interface RepoCardProps {
 
 const RepoCard: React.FC<RepoCardProps> = ({ repo }) => {
   return (
-    <div className="group relative h-full flex flex-col bg-white dark:bg-base-900 rounded-2xl p-5 shadow-sm border border-base-200 dark:border-base-800 transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-xl hover:border-primary/30 dark:hover:border-primary/30 hover:shadow-primary/5">
+    <div className="group relative h-full flex flex-col bg-white dark:bg-base-900 rounded-2xl p-5 shadow-sm border border-base-200 dark:border-base-800 transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-xl hover:border-primary/30 dark:hover:border-primary/30 hover:shadow-primary/5 animate-fade-in">
         
-        {/* Main Click Area (Absolute Link for the Card) */}
         <Link 
             to={`/repo/${repo.full_name}`} 
             className="absolute inset-0 z-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-base-900"
             aria-label={`View repository ${repo.full_name}`}
         />
 
-        {/* Top Section: Title & Language */}
         <div className="flex justify-between items-start mb-2 relative z-0 pointer-events-none">
-            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 truncate pr-2 group-hover:text-primary transition-colors">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 truncate pr-2 group-hover:text-primary transition-colors duration-300">
                 {repo.name}
             </h3>
             {repo.language && (
                 <span className="flex-shrink-0 flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-base-100 dark:bg-base-800 text-gray-600 dark:text-gray-300 border border-base-200 dark:border-base-700">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary mr-1.5"></span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary mr-1.5 animate-pulse"></span>
                     {repo.language}
                 </span>
             )}
         </div>
 
-        {/* Middle Section: Description & Topics */}
         <div className="relative z-0 pointer-events-none flex-grow flex flex-col">
             <p className="text-gray-600 dark:text-base-300 text-sm h-10 overflow-hidden line-clamp-2 leading-relaxed mb-3">
                 {repo.description || "No description provided."}
@@ -56,12 +53,9 @@ const RepoCard: React.FC<RepoCardProps> = ({ repo }) => {
             )}
         </div>
         
-        {/* Divider */}
         <div className="my-4 border-t border-base-100 dark:border-base-800/50 relative z-0"></div>
 
-        {/* Footer: Owner & Stats */}
         <div className="mt-auto flex items-center justify-between">
-             {/* Owner Info - Interactive Z-10 to allow clicking the user profile specifically */}
             <div className="relative z-10 flex items-center min-w-0 mr-4">
                 <Link 
                     to={`/profile/${repo.owner.login}`} 
@@ -78,7 +72,6 @@ const RepoCard: React.FC<RepoCardProps> = ({ repo }) => {
                 </Link>
             </div>
 
-            {/* Metrics */}
             <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 relative z-0 pointer-events-none flex-shrink-0">
                 <div className="flex items-center" title="Stars">
                     <Star size={14} className="mr-1 text-yellow-500 fill-yellow-500" />

@@ -18,6 +18,7 @@ import DeploymentList from '../components/DeploymentList';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import ErrorDisplay from '../components/common/ErrorDisplay';
+import CustomLoader from '../components/common/CustomLoader';
 
 const TABS = [
   { name: 'Code', icon: Code },
@@ -35,7 +36,9 @@ const SkeletonLoader: React.FC = () => (
         {/* Header Skeleton */}
         <div className="mb-8">
             <div className="flex items-center mb-4">
-                <div className="w-10 h-10 bg-base-200 dark:bg-base-800 rounded-full mr-4"></div>
+                <div className="w-10 h-10 bg-base-200 dark:bg-base-800 rounded-full mr-4 flex items-center justify-center">
+                    <CustomLoader size={24} />
+                </div>
                 <div className="flex flex-col gap-2 w-full max-w-md">
                     <div className="h-7 bg-base-200 dark:bg-base-800 rounded w-3/4"></div>
                     <div className="h-4 bg-base-200 dark:bg-base-800 rounded w-1/2"></div>
@@ -74,37 +77,14 @@ const SkeletonLoader: React.FC = () => (
                         </div>
                     ))}
                 </div>
-
-                 {/* README Skeleton */}
-                 <div className="border border-base-200 dark:border-base-800 rounded-lg overflow-hidden">
-                     <div className="p-3 bg-base-50 dark:bg-base-900 border-b border-base-200 dark:border-base-800 h-10 w-full"></div>
-                     <div className="p-6 space-y-4">
-                        <div className="h-6 bg-base-200 dark:bg-base-800 rounded w-3/4 mb-6"></div>
-                        <div className="h-4 bg-base-200 dark:bg-base-800 rounded w-full"></div>
-                        <div className="h-4 bg-base-200 dark:bg-base-800 rounded w-full"></div>
-                        <div className="h-4 bg-base-200 dark:bg-base-800 rounded w-5/6"></div>
-                        <div className="h-4 bg-base-200 dark:bg-base-800 rounded w-full mt-4"></div>
-                     </div>
-                 </div>
             </main>
             
             <aside className="hidden lg:block lg:w-80 space-y-6">
-                {/* AI Sidebar Skeleton */}
                 <div className="h-40 bg-base-200 dark:bg-base-800 rounded-xl"></div>
-                {/* About Skeleton */}
                 <div className="space-y-3">
                     <div className="h-4 w-16 bg-base-200 dark:bg-base-800 rounded"></div>
                     <div className="h-4 w-full bg-base-200 dark:bg-base-800 rounded"></div>
                     <div className="h-4 w-5/6 bg-base-200 dark:bg-base-800 rounded"></div>
-                </div>
-                {/* Languages Skeleton */}
-                <div>
-                     <div className="h-4 w-24 bg-base-200 dark:bg-base-800 rounded mb-3"></div>
-                     <div className="h-3 w-full bg-base-200 dark:bg-base-800 rounded-full mb-2"></div>
-                     <div className="flex gap-2">
-                        <div className="h-3 w-12 bg-base-200 dark:bg-base-800 rounded"></div>
-                        <div className="h-3 w-12 bg-base-200 dark:bg-base-800 rounded"></div>
-                     </div>
                 </div>
             </aside>
         </div>
@@ -220,7 +200,7 @@ export default function RepoDetailPage() {
     switch (activeTab) {
       case 'Code':
         return (
-          <>
+          <div className="animate-fade-in">
             <FileExplorer owner={owner!} name={name!} path={currentPath} branch={branch} branches={branches} />
             {readmeContent && readmePath && !currentPath && (
               <div className="mt-8 border border-base-200 dark:border-base-800 rounded-xl">
@@ -239,7 +219,7 @@ export default function RepoDetailPage() {
                 </div>
               </div>
             )}
-          </>
+          </div>
         );
       case 'Commits':
         return <CommitList owner={owner!} repo={name!} />;
@@ -305,7 +285,6 @@ export default function RepoDetailPage() {
         </div>
       </div>
 
-      {/* Mobile Sidebar */}
       <div
         className={`lg:hidden fixed inset-0 z-50 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'visible bg-black/60' : 'invisible'}`}
         onClick={() => setIsSidebarOpen(false)}

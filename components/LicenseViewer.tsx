@@ -1,6 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { githubApi } from '../services/githubApi';
-import { Loader2, Scale, AlertTriangle } from 'lucide-react';
+import { Scale, AlertTriangle } from 'lucide-react';
+import CustomLoader from './common/CustomLoader';
 
 interface LicenseViewerProps {
   owner: string;
@@ -33,7 +35,7 @@ const LicenseViewer: React.FC<LicenseViewerProps> = ({ owner, repo }) => {
   }, [owner, repo]);
 
   if (loading) {
-    return <div className="flex justify-center items-center h-64"><Loader2 className="animate-spin" size={32} /></div>;
+    return <div className="flex justify-center items-center h-64"><CustomLoader size={48} /></div>;
   }
 
   if (error || !license) {
@@ -46,7 +48,7 @@ const LicenseViewer: React.FC<LicenseViewerProps> = ({ owner, repo }) => {
   }
 
   return (
-    <div className="border border-base-200 dark:border-base-800 rounded-lg overflow-hidden">
+    <div className="border border-base-200 dark:border-base-800 rounded-lg overflow-hidden animate-fade-in">
       <div className="p-4 bg-base-100 dark:bg-base-900 border-b border-base-200 dark:border-base-800 rounded-t-lg">
         <h3 className="font-semibold flex items-center text-base-900 dark:text-base-100"><Scale size={16} className="mr-2" /> {license.name}</h3>
       </div>

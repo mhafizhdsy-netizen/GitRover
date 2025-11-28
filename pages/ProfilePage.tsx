@@ -10,6 +10,7 @@ import RepoCard from '../components/RepoCard';
 import ErrorDisplay from '../components/common/ErrorDisplay';
 import { formatNumber, formatRelativeTime, formatFileSize } from '../utils/formatters';
 import GistViewerModal from '../components/GistViewerModal';
+import CustomLoader from '../components/common/CustomLoader';
 
 const ProfilePageSkeleton: React.FC = () => (
     <div className="container mx-auto px-4 py-8">
@@ -79,31 +80,23 @@ const ProfilePage: React.FC = () => {
     const [contentLoading, setContentLoading] = useState(false);
     const [error, setError] = useState<any>(null);
     const [selectedGistId, setSelectedGistId] = useState<string | null>(null);
-    
-    // Avatar Modal State
     const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
 
-    // Get params from URL
     const page = parseInt(searchParams.get('page') || '1', 10);
     const tabParam = searchParams.get('tab');
-    
-    // Determine active tab (default to 'repos')
     const activeTab = (tabParam === 'gists' ? 'gists' : 'repos') as 'repos' | 'gists';
-    
     const [totalPages, setTotalPages] = useState(1);
 
     const fetchProfile = useCallback(() => {
         if (!username) return;
         setLoading(true);
         setError(null);
-        
         githubApi.getUserProfile(username)
             .then(response => {
                 setUser(response.data);
             })
             .catch(err => {
                 setError(err);
-                console.error(err);
             })
             .finally(() => setLoading(false));
     }, [username]);
@@ -122,7 +115,6 @@ const ProfilePage: React.FC = () => {
 
     useEffect(() => {
         if (!user || !username) return;
-
         setContentLoading(true);
         const fetchData = async () => {
             try {
@@ -134,22 +126,18 @@ const ProfilePage: React.FC = () => {
                     setGists(res.data);
                 }
             } catch (err) {
-                console.error(`Failed to fetch ${activeTab}:`, err);
                 if (activeTab === 'repos') setRepos([]);
                 else setGists([]);
             } finally {
                 setContentLoading(false);
             }
         };
-
         fetchData();
     }, [username, user, page, activeTab]);
-
 
     const handlePageChange = (newPage: number) => {
         if (newPage > 0 && newPage <= totalPages) {
             setSearchParams({ tab: activeTab, page: newPage.toString() });
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
     
@@ -160,7 +148,7 @@ const ProfilePage: React.FC = () => {
     };
 
     if (loading) {
-        return <div className="flex flex-col min-h-screen"><Header /><ProfilePageSkeleton /><Footer /></div>;
+        return <div className="flex flex-col min-h-screen"><Header /><div className="flex-grow flex items-center justify-center"><CustomLoader size={80} text="Loading Profile..." /></div><Footer /></div>;
     }
 
     if (error || !user) {
@@ -183,7 +171,6 @@ const ProfilePage: React.FC = () => {
                     onClick={() => handlePageChange(page - 1)} 
                     disabled={page === 1}
                     className="p-2 bg-white dark:bg-base-900 border border-base-300 dark:border-base-700 rounded-lg disabled:opacity-50 hover:bg-base-50 dark:hover:bg-base-800 transition"
-                    aria-label="Previous page"
                 >
                     <ChevronLeft size={18} />
                 </button>
@@ -194,7 +181,6 @@ const ProfilePage: React.FC = () => {
                     onClick={() => handlePageChange(page + 1)} 
                     disabled={page === totalPages}
                     className="p-2 bg-white dark:bg-base-900 border border-base-300 dark:border-base-700 rounded-lg disabled:opacity-50 hover:bg-base-50 dark:hover:bg-base-800 transition"
-                    aria-label="Next page"
                 >
                     <ChevronRight size={18} />
                 </button>
@@ -209,7 +195,6 @@ const ProfilePage: React.FC = () => {
                 {/* Profile Header */}
                 <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left space-y-6 md:space-y-0 md:space-x-8 mb-12 animate-fade-in">
                     
-                    {/* Clickable Avatar */}
                     <button 
                         onClick={() => setIsAvatarModalOpen(true)}
                         className="group relative w-40 h-40 rounded-full border-4 border-white dark:border-base-900 shadow-xl overflow-hidden flex-shrink-0 focus:outline-none focus:ring-4 focus:ring-primary/50"
@@ -283,10 +268,8 @@ const ProfilePage: React.FC = () => {
 
                 {/* Content Grid */}
                 {contentLoading ? (
-                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
-                         {Array.from({ length: 6 }).map((_, i) => (
-                             <div key={i} className="bg-white dark:bg-base-900 p-5 rounded-2xl h-48 border border-base-200 dark:border-base-800"></div>
-                         ))}
+                     <div className="flex justify-center items-center py-20 w-full col-span-full">
+                         <CustomLoader size={60} />
                      </div>
                 ) : activeTab === 'repos' ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -312,7 +295,6 @@ const ProfilePage: React.FC = () => {
             </main>
             <Footer />
 
-            {/* Gist Viewer Modal */}
             {selectedGistId && (
                 <GistViewerModal 
                     gistId={selectedGistId} 
@@ -320,15 +302,17 @@ const ProfilePage: React.FC = () => {
                 />
             )}
 
-            {/* Avatar Preview Modal */}
             {isAvatarModalOpen && (
                 <div 
                     className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
                     onClick={() => setIsAvatarModalOpen(false)}
                 >
                     <button 
-                        onClick={() => setIsAvatarModalOpen(false)}
-                        className="absolute top-6 right-6 p-3 rounded-full bg-black/50 hover:bg-black/80 text-white transition-colors border border-white/10"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsAvatarModalOpen(false);
+                        }}
+                        className="absolute top-6 right-6 p-3 rounded-full bg-black/50 hover:bg-black/80 text-white transition-colors border border-white/10 z-[110]"
                         aria-label="Close preview"
                     >
                         <X size={24} />

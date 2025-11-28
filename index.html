@@ -228,41 +228,54 @@
         position: relative;
         cursor: pointer;
         transition: background-color 0.15s ease-in-out;
-        /* NO PADDING here to prevent layout shifts */
       }
       .foldable-line:hover {
         background-color: rgba(128, 128, 128, 0.08) !important;
       }
+      /* Position the indicator more precisely relative to the line number gutter */
       .foldable-line::before {
         content: '▾';
         position: absolute;
-        /* Position indicator within the line number gutter, to the right of the number */
-        left: 36px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 16px;
-        height: 16px;
+        left: 2px; /* Fixed close to the left edge of the container */
+        top: 0;
+        height: 100%;
+        width: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #9ca3af; /* gray-400 */
-        font-size: 1rem; /* Increase size for visibility */
-        line-height: 1;
-        transition: color 0.2s ease;
+        color: #9ca3af;
+        font-size: 0.8rem;
         z-index: 10;
-        user-select: none; /* Crucial: Prevent selecting the folding arrow */
+        user-select: none;
       }
       .dark .foldable-line::before {
-        color: #6b7280; /* gray-500 */
+        color: #6b7280;
       }
       .foldable-line:hover::before {
-        color: #374151; /* gray-700 */
+        color: #374151;
       }
       .dark .foldable-line:hover::before {
-        color: #d1d5db; /* gray-300 */
+        color: #d1d5db;
       }
       .foldable-line.folded::before {
         content: '▸';
+      }
+      
+      /* Animations for Custom Loader */
+      @keyframes draw {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+      .animate-draw {
+        animation: draw 2s ease-in-out infinite alternate;
+      }
+      @keyframes fadeFill {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 1; }
+      }
+      .animate-fade-fill {
+        animation: fadeFill 3s ease-in-out infinite;
       }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -271,19 +284,19 @@
   <script type="importmap">
 {
   "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
-    "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
-    "remark-gfm": "https://aistudiocdn.com/remark-gfm@^4.0.1",
-    "rehype-raw": "https://esm.sh/rehype-raw@7.0.0",
-    "axios": "https://aistudiocdn.com/axios@^1.13.2",
-    "react-syntax-highlighter/": "https://aistudiocdn.com/react-syntax-highlighter@^16.1.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
     "react-syntax-highlighter": "https://aistudiocdn.com/react-syntax-highlighter@^16.1.0",
-    "@google/genai": "https://esm.sh/@google/genai",
+    "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
+    "remark-gfm": "https://aistudiocdn.com/remark-gfm@^4.0.1",
+    "rehype-raw": "https://aistudiocdn.com/rehype-raw@^7.0.0",
+    "react-syntax-highlighter/": "https://aistudiocdn.com/react-syntax-highlighter@^16.1.0/",
+    "react-dom": "https://aistudiocdn.com/react-dom@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "axios": "https://aistudiocdn.com/axios@^1.13.2",
     "vite": "https://aistudiocdn.com/vite@^7.2.4",
     "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1"
   }

@@ -2,12 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { Gist, GistFile } from '../types';
 import { githubApi } from '../services/githubApi';
-import { X, FileCode, Loader2, ExternalLink, Copy, Check } from 'lucide-react';
+import { X, FileCode, ExternalLink, Copy, Check } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { useSettings } from '../contexts/SettingsContext';
 import { useToast } from '../contexts/ToastContext';
 import { formatFileSize } from '../utils/formatters';
 import { getLanguageFromFilename } from '../utils/languageUtils';
+import CustomLoader from './common/CustomLoader';
 
 interface GistViewerModalProps {
   gistId: string;
@@ -69,8 +70,7 @@ const GistViewerModal: React.FC<GistViewerModalProps> = ({ gistId, onClose }) =>
         <div className="flex-1 overflow-y-auto p-0 bg-base-100 dark:bg-base-950/50">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-64">
-                <Loader2 size={32} className="animate-spin text-primary mb-4" />
-                <p className="text-gray-500">Loading gist...</p>
+                <CustomLoader size={48} text="Loading gist..." />
             </div>
           ) : error || !gist ? (
             <div className="flex flex-col items-center justify-center h-64 text-red-500">

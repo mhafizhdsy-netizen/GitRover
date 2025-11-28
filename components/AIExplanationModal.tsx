@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, Loader2, AlertTriangle } from 'lucide-react';
+import { X, Sparkles, AlertTriangle } from 'lucide-react';
 import { aiService } from '../services/aiService';
 import MarkdownRenderer from './MarkdownRenderer';
+import CustomLoader from './common/CustomLoader';
 
 interface AIExplanationModalProps {
   codeSnippet: string;
@@ -29,7 +30,7 @@ const AIExplanationModal: React.FC<AIExplanationModalProps> = ({ codeSnippet, on
   }, [codeSnippet]);
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-[60] flex justify-center items-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/60 z-[60] flex justify-center items-center p-4 animate-fade-in" onClick={onClose}>
       <div 
         className="bg-white dark:bg-base-900 rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85vh] overflow-hidden" 
         onClick={(e) => e.stopPropagation()}
@@ -45,7 +46,6 @@ const AIExplanationModal: React.FC<AIExplanationModalProps> = ({ codeSnippet, on
         </header>
         
         <div className="p-6 overflow-y-auto">
-          {/* Selected Code Section - Constrained Height & Wrapping */}
           <div className="bg-base-100 dark:bg-base-800 p-4 rounded-lg border border-base-200 dark:border-base-700">
             <h3 className="text-xs font-bold uppercase tracking-wider mb-2 text-gray-500 dark:text-base-400">Selected Code Context</h3>
             <div className="max-h-32 overflow-y-auto custom-scrollbar">
@@ -60,8 +60,7 @@ const AIExplanationModal: React.FC<AIExplanationModalProps> = ({ codeSnippet, on
           <div>
             {loading && (
               <div className="flex flex-col items-center justify-center py-8">
-                <Loader2 size={32} className="animate-spin text-primary mb-3" />
-                <p className="text-sm text-gray-500 dark:text-base-400">Analyzing code with Gemini AI...</p>
+                <CustomLoader size={40} text="Analyzing code with Gemini AI..." />
               </div>
             )}
             

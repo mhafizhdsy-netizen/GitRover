@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
 import { PullRequest } from '../types';
-import { Loader2, GitPullRequest, GitMerge, GitPullRequestClosed, ServerCrash } from 'lucide-react';
+import { GitPullRequest, GitMerge, GitPullRequestClosed, ServerCrash } from 'lucide-react';
 import { formatRelativeTime } from '../utils/formatters';
+import CustomLoader from './common/CustomLoader';
 
 interface PullRequestListProps {
   owner: string;
@@ -41,10 +43,10 @@ const PullRequestList: React.FC<PullRequestListProps> = ({ owner, repo }) => {
   }
 
   return (
-    <div>
-      <ul className="border border-gray-200 dark:border-gray-700 rounded-lg">
+    <div className="animate-fade-in">
+      <ul className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
         {pulls.map((pr, index) => (
-          <li key={pr.id} className={`p-4 flex items-start space-x-4 ${index < pulls.length - 1 ? 'border-b border-gray-200 dark:border-gray-700' : ''}`}>
+          <li key={pr.id} className={`p-4 flex items-start space-x-4 hover:bg-base-50 dark:hover:bg-base-800/50 transition-colors duration-300 ${index < pulls.length - 1 ? 'border-b border-gray-200 dark:border-gray-700' : ''}`}>
             {pr.state === 'open' ? (
                 <GitPullRequest className="text-green-600 mt-1 flex-shrink-0" />
             ) : (pr as any).merged_at ? (
@@ -53,7 +55,7 @@ const PullRequestList: React.FC<PullRequestListProps> = ({ owner, repo }) => {
                 <GitPullRequestClosed className="text-red-600 mt-1 flex-shrink-0" />
             )}
             <div className="flex-1 min-w-0">
-              <span className="font-medium text-gray-800 dark:text-gray-100">
+              <span className="font-medium text-gray-800 dark:text-gray-100 hover:text-primary transition-colors cursor-pointer">
                 {pr.title}
               </span>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
@@ -65,7 +67,7 @@ const PullRequestList: React.FC<PullRequestListProps> = ({ owner, repo }) => {
         ))}
       </ul>
 
-      {loading && <div className="flex justify-center py-4"><Loader2 className="animate-spin" /></div>}
+      {loading && <div className="flex justify-center py-8"><CustomLoader size={48} /></div>}
 
       {hasMore && !loading && pulls.length > 0 && (
         <div className="text-center mt-4">

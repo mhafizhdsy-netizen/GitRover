@@ -2,13 +2,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { githubApi } from '../services/githubApi';
 import { Content } from '../types';
-import { Loader2, X, Download, File as FileIcon, Sparkles, Copy } from 'lucide-react';
+import { X, Download, File as FileIcon, Sparkles, Copy } from 'lucide-react';
 import MarkdownRenderer from './MarkdownRenderer';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import AIExplanationModal from './AIExplanationModal';
 import { useSettings } from '../contexts/SettingsContext';
 import { getLanguageFromFilename } from '../utils/languageUtils';
 import { useToast } from '../contexts/ToastContext';
+import CustomLoader from './common/CustomLoader';
 
 interface FileViewerProps {
   owner: string;
@@ -69,55 +70,42 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
         const ranges: { start: number; end: number }[] = [];
         const stack: { line: number; token: string }[] = [];
         
-        // Match pairs: { with }, [ with ], ( with ), and <tag> with </tag>
-        const openTokens: Record<string, string> = { '{': '}', '[': ']', '(': ')' };
-        const closeTokens: Record<string, string> = { '}': '{', ']': '[', ')': '(' };
-        const tokenRegex = /<([a-zA-Z0-9_:-]+)(?![^>]*\/>)[^>]*>|<\/([a-zA-Z0-9_:-]+)>|[{}[\]()]/g;
-
+        // Simpler robust regex to find open/close pairs
+        const openTokens = ['{', '[', '('];
+        const closeTokens = ['}', ']', ')'];
+        
         lines.forEach((line, i) => {
             const lineNumber = i + 1;
             const trimmedLine = line.trim();
-            // Basic comment skipping for performance
-            if (trimmedLine.startsWith('//') || trimmedLine.startsWith('/*') || trimmedLine.startsWith('*') || trimmedLine.startsWith('#')) {
-                return;
-            }
+            
+            // Skip comments to avoid false positives in folding logic
+            if (trimmedLine.startsWith('//') || trimmedLine.startsWith('*') || trimmedLine.startsWith('#')) return;
 
-            let match;
-            while ((match = tokenRegex.exec(line)) !== null) {
-                const fullMatch = match[0];
-                const openingTag = match[1];
-                const closingTag = match[2];
-                const lastOpener = stack[stack.length - 1];
-
-                if (openingTag) { // HTML open tag
-                    stack.push({ line: lineNumber, token: openingTag });
-                } else if (fullMatch in openTokens) { // Bracket open
-                    stack.push({ line: lineNumber, token: fullMatch });
-                } else if (closingTag) { // HTML close tag
-                    if (lastOpener && lastOpener.token === closingTag) {
-                        const startInfo = stack.pop()!;
-                        if (lineNumber > startInfo.line) {
-                            ranges.push({ start: startInfo.line, end: lineNumber });
-                        }
-                    }
-                } else if (fullMatch in closeTokens) { // Bracket close
-                    if (lastOpener && lastOpener.token === closeTokens[fullMatch]) {
-                        const startInfo = stack.pop()!;
-                        if (lineNumber > startInfo.line) {
-                            ranges.push({ start: startInfo.line, end: lineNumber });
-                        }
+            // Iterate through characters to handle nesting correctly
+            for (let char of line) {
+                if (openTokens.includes(char)) {
+                    stack.push({ line: lineNumber, token: char });
+                } else if (closeTokens.includes(char)) {
+                    const last = stack[stack.length - 1];
+                    // Check if it matches the last open token
+                    if (last && openTokens.indexOf(last.token) === closeTokens.indexOf(char)) {
+                         const startInfo = stack.pop()!;
+                         // Only create a range if it spans multiple lines
+                         if (lineNumber > startInfo.line) {
+                             ranges.push({ start: startInfo.line, end: lineNumber });
+                         }
                     }
                 }
             }
         });
 
-        // Sort by start line, then by end line descending to get largest blocks first
-        ranges.sort((a, b) => a.start - b.start || b.end - a.end);
-
-        // Filter out nested ranges that start on the same line, keeping the outermost
-        const uniqueRanges = ranges.filter((range, index, self) => 
-            index === 0 || range.start !== self[index - 1].start
-        );
+        // Filter out ranges that are completely contained within the start line of another range (duplicates)
+        // and sort by start line
+        const uniqueRanges = ranges
+            .filter((range, index, self) => 
+                index === self.findIndex((r) => r.start === range.start && r.end === range.end)
+            )
+            .sort((a, b) => a.start - b.start);
 
         setFoldableRanges(uniqueRanges);
         setFoldedLines(new Set());
@@ -136,137 +124,62 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
     });
   };
   
-  // Handle Zoom via Wheel (Ctrl + Scroll) or Touch Pinch
+  // Handle Zoom via Wheel (Ctrl + Scroll)
   useEffect(() => {
     const container = contentRef.current;
     if (!container) return;
 
-    // --- Wheel Logic ---
     const handleWheel = (e: WheelEvent) => {
         if (e.ctrlKey || e.metaKey) {
             e.preventDefault();
             e.stopPropagation();
-            
-            // e.deltaY < 0 means scrolling up (zoom in)
-            // e.deltaY > 0 means scrolling down (zoom out)
             const delta = e.deltaY > 0 ? -1 : 1;
-            
-            setFontSize(prev => {
-                const newSize = prev + delta;
-                return Math.min(Math.max(newSize, 10), 32); // Clamp between 10px and 32px
-            });
+            setFontSize(prev => Math.min(Math.max(prev + delta, 10), 32));
         }
     };
-
-    // --- Touch Logic (Pinch to Zoom) ---
-    let initialDistance: number | null = null;
-    let initialFontSize: number | null = null;
-
-    const getDistance = (touches: TouchList) => {
-        return Math.hypot(
-            touches[0].clientX - touches[1].clientX,
-            touches[0].clientY - touches[1].clientY
-        );
-    };
-
-    const handleTouchStart = (e: TouchEvent) => {
-        if (e.touches.length === 2) {
-            initialDistance = getDistance(e.touches);
-            initialFontSize = fontSizeRef.current;
-        }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-        if (e.touches.length === 2 && initialDistance !== null && initialFontSize !== null) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const currentDistance = getDistance(e.touches);
-            const ratio = currentDistance / initialDistance;
-            const newSize = initialFontSize * ratio;
-            
-            setFontSize(Math.min(Math.max(newSize, 10), 32));
-        }
-    };
-
-    const handleTouchEnd = () => {
-        initialDistance = null;
-        initialFontSize = null;
-    };
-
-    // Use passive: false to allow preventDefault
-    container.addEventListener('wheel', handleWheel, { passive: false });
     
-    // Touch listeners
-    container.addEventListener('touchstart', handleTouchStart, { passive: true });
-    container.addEventListener('touchmove', handleTouchMove, { passive: false });
-    container.addEventListener('touchend', handleTouchEnd);
-    container.addEventListener('touchcancel', handleTouchEnd);
+    // Allow standard pinch-to-zoom on touch devices, handled natively mostly, 
+    // but preventing wheel zoom interference.
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('wheel', handleWheel);
+  }, []);
 
-    return () => {
-        container.removeEventListener('wheel', handleWheel);
-        container.removeEventListener('touchstart', handleTouchStart);
-        container.removeEventListener('touchmove', handleTouchMove);
-        container.removeEventListener('touchend', handleTouchEnd);
-        container.removeEventListener('touchcancel', handleTouchEnd);
-    };
-  }, [loading]); // Re-attach if loading state changes (content re-renders)
-
-  // Handle selection logic for both mouse and touch
+  // Handle selection logic
   useEffect(() => {
     const handleSelectionChange = () => {
         const selection = window.getSelection();
-        
-        // 1. Basic checks for valid selection
-        if (!selection || selection.rangeCount === 0) {
+        if (!selection || selection.rangeCount === 0 || !contentRef.current?.contains(selection.anchorNode)) {
             setSelectedText('');
             setButtonPosition(null);
             return;
         }
 
-        // 2. Ensure selection is inside our content container
-        if (!contentRef.current?.contains(selection.anchorNode)) {
-             // This check is mostly handled by CSS 'select-none' on the container now,
-             // but we keep it for safety.
-             return;
-        }
-        
-        // 3. Get text, but verify it's not just whitespace
         const text = selection.toString().trim();
-        
         if (text) {
             setSelectedText(text);
-            
-            // Only calculate position for desktop popup. 
-            // Mobile will use a fixed bottom bar.
             if (window.matchMedia('(min-width: 768px)').matches) {
                 try {
                     const range = selection.getRangeAt(0);
                     const rect = range.getBoundingClientRect();
                     const containerRect = contentRef.current.getBoundingClientRect();
-                    
-                    // Calculate relative position
                     setButtonPosition({
                         top: rect.top - containerRect.top - 40,
                         left: rect.left - containerRect.left + rect.width / 2,
                     });
-                } catch (e) {
-                    console.error("Error calculating selection position", e);
+                } catch {
                     setButtonPosition(null);
                 }
             } else {
-                setButtonPosition(null); // Ensure floating button doesn't show on mobile
+                setButtonPosition(null);
             }
         } else {
             setSelectedText('');
             setButtonPosition(null);
         }
     };
-
     document.addEventListener('selectionchange', handleSelectionChange);
     return () => document.removeEventListener('selectionchange', handleSelectionChange);
   }, []);
-
 
   const handleCopy = () => {
     if (content) {
@@ -279,8 +192,6 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
   const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
   const isMarkdown = fileExtension === 'md';
   const isImage = ['png', 'jpg', 'jpeg', 'gif', 'svg'].includes(fileExtension);
-  
-  // Use the utility to get the correct Prism language key
   const language = getLanguageFromFilename(file.name);
 
   const getLineProps = (lineNumber: number) => {
@@ -288,7 +199,8 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
     const range = foldableRanges.find(r => r.start === lineNumber);
     const isFolded = foldedLines.has(lineNumber);
 
-    const containingFold = foldableRanges.find(r => foldedLines.has(r.start) && lineNumber > r.start && lineNumber < r.end);
+    // Hide lines that are inside a folded block
+    const containingFold = foldableRanges.find(r => foldedLines.has(r.start) && lineNumber > r.start && lineNumber <= r.end);
 
     if (containingFold) {
         props.style = { display: 'none' };
@@ -298,9 +210,12 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
     if (range) {
         props.className = `foldable-line ${isFolded ? 'folded' : ''}`;
         props.onClick = (e) => {
-            // Prevent text selection when folding
+            // Only fold if clicking the gutter/indicator area, not text
+            // But SyntaxHighlighter row click includes everything. 
+            // We check if text is selected to avoid accidental folding while selecting.
             if (window.getSelection()?.toString()) return;
-            e.preventDefault();
+            
+            // Allow folding toggle
             toggleFold(lineNumber);
         };
     }
@@ -309,13 +224,12 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
 
   const renderContent = () => {
     if (loading) {
-      return <div className="flex justify-center items-center h-64"><Loader2 className="animate-spin" size={32} /></div>;
+      return <div className="flex justify-center items-center h-64"><CustomLoader size={64} text="Loading file..." /></div>;
     }
     if (!content) {
       return <p>No content to display.</p>;
     }
     if (isMarkdown) {
-      // Wrap markdown in select-text cursor-text to allow selection
       return (
         <div className="select-text cursor-text">
             <MarkdownRenderer content={content} owner={owner} repoName={repoName} branch={branch} filePath={file.path} />
@@ -333,9 +247,8 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
           showLineNumbers
           wrapLines
           lineProps={getLineProps}
-          // IMPORTANT: Prevent line number selection to fix AI explain issues
           lineNumberStyle={{ 
-            minWidth: '2.5em', 
+            minWidth: '3.5em', 
             paddingRight: '1em', 
             textAlign: 'right', 
             userSelect: 'none', 
@@ -358,7 +271,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
 
   return (
     <>
-        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4" onClick={onClose}>
+        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center p-4 animate-fade-in" onClick={onClose}>
         <div 
             className="bg-white dark:bg-base-900 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col relative" 
             onClick={(e) => e.stopPropagation()}
@@ -369,42 +282,23 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
                 <span className="truncate">{file.path}</span>
             </div>
             <div className="flex items-center space-x-1">
-                <button 
-                  onClick={handleCopy}
-                  className="p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition text-gray-600 dark:text-gray-300"
-                  title="Copy file content"
-                >
+                <button onClick={handleCopy} className="p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition text-gray-600 dark:text-gray-300">
                   <Copy size={18} />
                 </button>
                 {file.download_url && (
-                <a 
-                  href={file.download_url} 
-                  download 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition text-gray-600 dark:text-gray-300"
-                  title="Download raw file"
-                >
+                <a href={file.download_url} download target="_blank" rel="noopener noreferrer" className="p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition text-gray-600 dark:text-gray-300">
                     <Download size={18} />
                 </a>
                 )}
-                <button 
-                  onClick={onClose} 
-                  className="p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition text-gray-600 dark:text-gray-300"
-                  title="Close"
-                >
-                <X size={18} />
+                <button onClick={onClose} className="p-2 rounded-full hover:bg-base-100 dark:hover:bg-base-800 transition text-gray-600 dark:text-gray-300">
+                    <X size={18} />
                 </button>
             </div>
             </header>
             
-            <div 
-                className="p-4 overflow-auto relative flex-1 text-gray-800 dark:text-gray-200 select-none cursor-default" 
-                ref={contentRef}
-            >
+            <div className="p-4 overflow-auto relative flex-1 text-gray-800 dark:text-gray-200 select-none cursor-default" ref={contentRef}>
                 {renderContent()}
                 
-                {/* Desktop Floating Button */}
                 {buttonPosition && selectedText && (
                     <button
                         onMouseDown={(e) => e.preventDefault()}
@@ -418,7 +312,6 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
                 )}
             </div>
 
-            {/* Mobile Bottom Fixed Button */}
             {selectedText && (
                <div className="md:hidden absolute bottom-4 left-0 right-0 flex justify-center z-20 animate-fade-in px-4">
                   <button
@@ -431,15 +324,9 @@ const FileViewer: React.FC<FileViewerProps> = ({ owner, repoName, file, onClose,
                   </button>
                </div>
             )}
-
         </div>
         </div>
-        {isModalOpen && (
-            <AIExplanationModal 
-                codeSnippet={selectedText}
-                onClose={() => setIsModalOpen(false)}
-            />
-        )}
+        {isModalOpen && <AIExplanationModal codeSnippet={selectedText} onClose={() => setIsModalOpen(false)} />}
     </>
   );
 };

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { githubApi } from '../services/githubApi';
@@ -7,7 +8,7 @@ import { Search, ChevronLeft, ChevronRight, ListFilter, ChevronDown } from 'luci
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import ErrorDisplay from '../components/common/ErrorDisplay';
-import { useSettings } from '../contexts/SettingsContext';
+import CustomLoader from '../components/common/CustomLoader';
 
 const SkeletonCard: React.FC = () => (
   <div className="bg-white dark:bg-base-900 p-5 rounded-2xl relative overflow-hidden shadow-sm border border-base-200 dark:border-base-800">
@@ -27,13 +28,10 @@ const SkeletonCard: React.FC = () => (
 );
 
 export default function HomePage() {
-  // Use setSearchParams to update the URL
   const [searchParams, setSearchParams] = useSearchParams();
   
   const initialQuery = searchParams.get('q') || 'react';
-  // Initialize page from URL, default to 1 if missing
   const initialPage = parseInt(searchParams.get('page') || '1', 10);
-  // Initialize sort from URL, default to 'best-match' (GitHub default)
   const initialSort = searchParams.get('sort') || 'best-match';
   
   const [query, setQuery] = useState(initialQuery);
@@ -42,12 +40,10 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<any>(null);
   
-  // Sync state with URL param
   const [page, setPage] = useState(initialPage);
   const [sort, setSort] = useState(initialSort);
   const [totalPages, setTotalPages] = useState(0);
 
-  // Custom Dropdown State
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
 
@@ -55,10 +51,8 @@ export default function HomePage() {
     setLoading(true);
     setError(null);
     try {
-      // Pass the selected sort option. 'best-match' will be handled by the API service (omitted from params).
       const { data } = await githubApi.searchRepositories(searchTerm, sort, 'desc', page);
       setRepos(data.items);
-      // Github API search limit is 1000 results. 12 per page = ~84 pages max.
       setTotalPages(Math.min(Math.ceil(data.total_count / 12), 84));
     } catch (err: any) {
       setError(err);
@@ -72,7 +66,6 @@ export default function HomePage() {
     fetchRepos();
   }, [fetchRepos]);
 
-  // Handle click outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
         if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
@@ -88,21 +81,18 @@ export default function HomePage() {
     if (query.trim()) {
         setPage(1);
         setSearchTerm(query);
-        // Update URL with new query, reset page to 1, keep current sort
         setSearchParams({ q: query, page: '1', sort: sort });
     }
   };
 
   const handlePageChange = (newPage: number) => {
       setPage(newPage);
-      // Update URL to reflect new page number and keep sort. 
-      // The global ScrollToTop component will handle scrolling since the URL changes.
       setSearchParams({ q: searchTerm, page: newPage.toString(), sort: sort });
   };
 
   const handleSortSelect = (newSort: string) => {
       setSort(newSort);
-      setPage(1); // Reset to first page on sort change
+      setPage(1); 
       setSearchParams({ q: searchTerm, page: '1', sort: newSort });
       setIsSortOpen(false);
   };
@@ -111,32 +101,15 @@ export default function HomePage() {
     if (totalPages <= 1) return null;
 
     const pages = [];
-    // Always show first page
     pages.push(1);
 
-    // Calculate range around current page
     let start = Math.max(2, page - 1);
     let end = Math.min(totalPages - 1, page + 1);
 
-    // Add ellipsis before range if needed
-    if (start > 2) {
-        pages.push('...');
-    }
-
-    // Add pages in range
-    for (let i = start; i <= end; i++) {
-        pages.push(i);
-    }
-
-    // Add ellipsis after range if needed
-    if (end < totalPages - 1) {
-        pages.push('...');
-    }
-
-    // Always show last page
-    if (totalPages > 1) {
-        pages.push(totalPages);
-    }
+    if (start > 2) pages.push('...');
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (end < totalPages - 1) pages.push('...');
+    if (totalPages > 1) pages.push(totalPages);
 
     return (
         <div className="flex items-center space-x-1.5 overflow-x-auto p-2">

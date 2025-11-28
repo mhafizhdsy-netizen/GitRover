@@ -2,8 +2,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { githubApi } from '../services/githubApi';
 import { Deployment, DeploymentStatus } from '../types';
-import { Loader2, Rocket, CheckCircle2, XCircle, AlertCircle, Clock, Globe, ServerCrash, GitCommit } from 'lucide-react';
+import { Rocket, CheckCircle2, XCircle, AlertCircle, Clock, Globe, ServerCrash, GitCommit } from 'lucide-react';
 import { formatRelativeTime } from '../utils/formatters';
+import CustomLoader from './common/CustomLoader';
 
 interface DeploymentListProps {
   owner: string;
@@ -30,7 +31,7 @@ const DeploymentItem: React.FC<{ deployment: Deployment; owner: string; repo: st
     }, [deployment.id, owner, repo]);
 
     const getStatusIcon = () => {
-        if (loading) return <Loader2 size={16} className="text-gray-400 animate-spin" />;
+        if (loading) return <div className="w-4 h-4 rounded-full border-2 border-gray-400 border-t-transparent animate-spin"></div>;
         const state = status?.state;
         if (state === 'success') return <CheckCircle2 size={18} className="text-green-500 bg-white dark:bg-base-900 rounded-full" />;
         if (state === 'failure' || state === 'error') return <XCircle size={18} className="text-red-500 bg-white dark:bg-base-900 rounded-full" />;
@@ -165,7 +166,7 @@ const DeploymentList: React.FC<DeploymentListProps> = ({ owner, repo }) => {
         ))}
       </div>
 
-      {loading && <div className="flex justify-center py-8"><Loader2 className="animate-spin text-primary" size={32} /></div>}
+      {loading && <div className="flex justify-center py-8"><CustomLoader size={48} /></div>}
 
       {hasMore && !loading && deployments.length > 0 && (
         <div className="text-center pt-6 pb-2">
